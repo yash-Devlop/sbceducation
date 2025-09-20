@@ -73,6 +73,18 @@ def initialize_empty_tables():
                     ON DELETE SET NULL
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS salary_history (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                emp_id VARCHAR(26) NOT NULL,
+                salary_amount INT NOT NULL,
+                salary_month DATE NOT NULL,
+                credited_at DATETIME,
+                status ENUM('credited','missed') DEFAULT 'missed',
+                CONSTRAINT fk_emp_salary FOREIGN KEY (emp_id) REFERENCES employees(id) ON DELETE CASCADE,
+                UNIQUE(emp_id, salary_month)
+            );
+        """)
 
         conn.commit()
         print("[INFO]: EMPTY TABLES CREATED")

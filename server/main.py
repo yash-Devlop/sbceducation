@@ -13,8 +13,12 @@ from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.db_config import get_db_connection, initialize_db
 from utils.api_error import raise_http_error
+from utils.scheduler import add_funds_daily, add_salary_hometeacher
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 from pydantic_models.models import Admin_login_request, emp_login_request, create_emp_request, Add_funds_request, HistoryRequest
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -86,10 +90,26 @@ def get_today_datetime_sql_format():
     return now_kolkata.strftime("%Y-%m-%d %H:%M:%S")
 #===============================================================
 
+scheduler = BackgroundScheduler()
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("[INFO]:  Starting up: Initialize resources")
     await asyncio.to_thread(initialize_db)
+
+    scheduler.add_job(
+        func=lambda: add_funds_daily(50),
+        trigger=CronTrigger(hour=4, minute=0, timezone=ZoneInfo("Asia/Kolkata")),
+        id="salary_job",
+        replace_existing=True
+    )
+    scheduler.add_job(
+        func=lambda: add_salary_hometeacher(4950),
+        trigger=CronTrigger(hour=4, minute=30, timezone=ZoneInfo("Asia/Kolkata")),
+        id="salary_job",
+        replace_existing=True
+    )
+    scheduler.start()
     
     try:
         yield
@@ -101,7 +121,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or restrict: ["http://localhost:3000", "https://yourdomain.com"]
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
