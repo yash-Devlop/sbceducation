@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sbeducational</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/Dashboard/css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <!-- NGO Header -->
+            <div class="login-header">
+                <div class="logo">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <h1>Sbeducational</h1>
+                <p>Making a difference together</p>
+            </div>
+
+            <!-- Login Type Selector -->
+            <div class="login-type-selector">
+                <button type="button" class="type-btn active" data-type="admin">
+                    <i class="fas fa-user-shield"></i>
+                    Admin
+                </button>
+                <button type="button" class="type-btn" data-type="manager">
+                    <i class="fas fa-user-tie"></i>
+                    Manager
+                </button>
+                <button type="button" class="type-btn" data-type="field-manager">
+                    <i class="fas fa-clipboard-list"></i>
+                    Field Manager
+                </button>
+                <button type="button" class="type-btn" data-type="home-teacher">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    Home Teacher
+                </button>
+            </div>
+
+            <!-- Login Forms -->
+            <div class="forms-container">
+                <!-- Admin Login Form -->
+                <form id="admin-form" class="login-form active">
+                    <div class="form-group">
+                        <label for="admin-username">Username</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="admin-username" name="username" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="admin-password" name="password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('admin-password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login as Admin
+                    </button>
+                </form>
+
+                <!-- Employee Login Forms -->
+                <form id="manager-form" class="login-form">
+                    <div class="form-group">
+                        <label for="manager-email">Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="manager-email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="manager-password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="manager-password" name="password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('manager-password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login as Manager
+                    </button>
+                </form>
+
+                <form id="field-manager-form" class="login-form">
+                    <div class="form-group">
+                        <label for="field-manager-email">Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="field-manager-email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="field-manager-password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="field-manager-password" name="password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('field-manager-password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login as Field Manager
+                    </button>
+                </form>
+
+                <form id="home-teacher-form" class="login-form">
+                    <div class="form-group">
+                        <label for="home-teacher-email">Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="home-teacher-email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="home-teacher-password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="home-teacher-password" name="password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('home-teacher-password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login as Home Teacher
+                    </button>
+                </form>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Authenticating...</p>
+            </div>
+
+            <!-- Message Display -->
+            <div id="message" class="message hidden"></div>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <p>&copy; 2025 Sbeducational. All rights reserved.</p>
+                <div class="help-links">
+                    <a href="#" onclick="showForgotPassword()">Forgot Password?</a> | 
+                    <a href="#" onclick="showHelp()">Need Help?</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/Dashboard/js/login.js"></script>
+
+   
+</body>
+</html>

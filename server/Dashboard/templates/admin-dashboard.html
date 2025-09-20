@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sbeducational - Admin Dashboard</title>
+    <link rel="stylesheet" href="/Dashboard/css/admin-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Header -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-hands-helping"></i>
+                <span>NGO Admin Portal</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#employees" class="nav-link" data-section="employees">
+                    <i class="fas fa-users"></i> Employees
+                </a>
+                <a href="#hierarchy" class="nav-link" data-section="hierarchy">
+                    <i class="fas fa-sitemap"></i> Hierarchy
+                </a>
+                <a href="#funds" class="nav-link" data-section="funds">
+                    <i class="fas fa-money-bill-wave"></i> Funds
+                </a>
+                <a href="#create" class="nav-link" data-section="create">
+                    <i class="fas fa-user-plus"></i> Add Employee
+                </a>
+            </div>
+            <div class="nav-user">
+                <span class="user-name">Admin</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-section active">
+            <div class="section-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Dashboard Overview</h1>
+                <p>Welcome to the NGO Management System</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card managers">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-managers">0</h3>
+                        <p>Total Managers</p>
+                    </div>
+                </div>
+                <div class="stat-card field-managers">
+                    <div class="stat-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-field-managers">0</h3>
+                        <p>Field Managers</p>
+                    </div>
+                </div>
+                <div class="stat-card home-teachers">
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-home-teachers">0</h3>
+                        <p>Home Teachers</p>
+                    </div>
+                </div>
+                <div class="stat-card funds">
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-funds">₹0</h3>
+                        <p>Total Distributed</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="activity-section">
+                <h2><i class="fas fa-clock"></i> Recent Transfers</h2>
+                <div class="activity-list" id="recent-transfers">
+                    <!-- Dynamic content -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Employees Section -->
+        <section id="employees-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-users"></i> All Employees</h1>
+                <div class="section-controls">
+                    <input type="text" id="employee-search" placeholder="Search employees..." class="search-input">
+                    <select id="role-filter" class="role-filter">
+                        <option value="">All Roles</option>
+                        <option value="manager">Managers</option>
+                        <option value="field-manager">Field Managers</option>
+                        <option value="home-teacher">Home Teachers</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="employees-table">
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Manager</th>
+                            <th>Funds</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employees-table-body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Hierarchy Section -->
+        <section id="hierarchy-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-sitemap"></i> Organization Hierarchy</h1>
+                <p>Visual representation of the organizational structure</p>
+            </div>
+            <div class="hierarchy-container" id="hierarchy-container">
+                <!-- Dynamic hierarchy tree -->
+            </div>
+        </section>
+
+        <!-- Funds Section -->
+        <section id="funds-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-money-bill-wave"></i> Funds Management</h1>
+                <p>Manage and transfer funds to employees</p>
+            </div>
+            
+            <div class="funds-grid">
+                <div class="funds-card">
+                    <h3><i class="fas fa-search"></i> Find Employee</h3>
+                    <div class="employee-search-form">
+                        <input type="text" id="emp-id-search" placeholder="Enter Employee ID" class="form-input">
+                        <button onclick="searchEmployee()" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div id="employee-details" class="employee-details" style="display: none;">
+                        <!-- Employee details will be shown here -->
+                    </div>
+                </div>
+                
+                <div class="funds-card">
+                    <h3><i class="fas fa-plus-circle"></i> Add Funds</h3>
+                    <div class="add-funds-form">
+                        <input type="text" id="receiver-id" placeholder="Employee ID" class="form-input" readonly>
+                        <input type="number" id="fund-amount" placeholder="Amount" class="form-input" min="1">
+                        <button onclick="addFunds()" class="btn btn-success" disabled id="add-funds-btn">
+                            <i class="fas fa-plus"></i> Add Funds
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funds Transfer History -->
+            <div class="transfer-history">
+                <h3><i class="fas fa-history"></i> Transfer History</h3>
+                <div class="table-container">
+                    <table class="transfers-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transfers-table-body">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create Employee Section -->
+        <section id="create-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-user-plus"></i> Create New Employee</h1>
+                <p>Add a new employee to the system</p>
+            </div>
+            
+            <div class="create-form-container">
+                <form id="create-employee-form" class="create-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-name">Full Name *</label>
+                            <input type="text" id="emp-name" name="name" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-role">Role *</label>
+                            <select id="emp-role" name="role" required class="form-input">
+                                <option value="">Select Role</option>
+                                <option value="manager">Manager</option>
+                                <option value="field-manager">Field Manager</option>
+                                <option value="home-teacher">Home Teacher</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-fname">Father's Name *</label>
+                            <input type="text" id="emp-fname" name="fname" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-mname">Mother's Name *</label>
+                            <input type="text" id="emp-mname" name="mname" required class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-dob">Date of Birth *</label>
+                            <input type="date" id="emp-dob" name="dob" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-email">Email *</label>
+                            <input type="email" id="emp-email" name="email" required class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-phone">Phone *</label>
+                            <input type="tel" id="emp-phone" name="phn" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-password">Password *</label>
+                            <input type="password" id="emp-password" name="pwd" required class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="emp-address">Address *</label>
+                        <textarea id="emp-address" name="addr" required class="form-input" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-city">City *</label>
+                            <input type="text" id="emp-city" name="city" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-district">District *</label>
+                            <input type="text" id="emp-district" name="district" required class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-state">State *</label>
+                            <input type="text" id="emp-state" name="state" required class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" onclick="resetForm()" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-plus"></i> Create Employee
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="/Dashboard/js/admin-dashboard.js"></script>
+</body>
+</html>
