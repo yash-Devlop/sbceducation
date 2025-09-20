@@ -14,9 +14,10 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.db_config import get_db_connection, initialize_db
 from utils.api_error import raise_http_error
 from utils.scheduler import add_funds_daily, add_salary_hometeacher
+from utils.helper import generate_emp_id, get_today_datetime_sql_format
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-from pydantic_models.models import Admin_login_request, emp_login_request, create_emp_request, Add_funds_request, HistoryRequest
+from pydantic_models.models import Admin_login_request, emp_login_request, create_emp_request, Add_funds_request, HistoryRequest, User_querry_request
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
@@ -67,28 +68,6 @@ allowed_hierarchy = {
 }
 
 #=========================================================
-
-#===================HELPER FUNCTIONS=======================
-def generate_emp_id(role: str) -> str:
-    role_prefix = {
-        "manager": "M",
-        "field-manager": "FM",
-        "home-teacher": "HT"
-    }
-
-    if role not in role_prefix:
-        raise ValueError(f"Unknown role: {role}")
-
-    rand_str = ''.join(random.choices(string.ascii_lowercase + string.digits, k=7))
-
-    return f"{role_prefix[role]}-{rand_str}"
-
-def get_today_datetime_sql_format():
-    kolkata_tz = pytz.timezone("Asia/Kolkata")
-    now_kolkata = datetime.now(kolkata_tz)
-
-    return now_kolkata.strftime("%Y-%m-%d %H:%M:%S")
-#===============================================================
 
 scheduler = BackgroundScheduler()
 
@@ -657,5 +636,55 @@ async def get_dashboard_stats(token_data: dict = Depends(get_login_role)):
     
     except Exception as err:
         raise_http_error("Cannot fetch dashboard stats", err)
+    finally:
+        conn.close()
+
+
+@app.post("/user_querry")
+async def get_user_querry(data: User_querry_request):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try: 
+        cursor.execute(
+            "INSERT INTO user_querry (name, email, phn, querry) VALUES (%s, %s, %s, %s)",
+            (data.name, data.email, data.phn, data.querry)
+        )
+        conn.commit()
+
+        return {"status": "good", "detail" : {"message": "querry noted"}}
+
+    except Exception as err:
+        raise_http_error("Cannot take questions right now", err)
+    finally:
+        conn.close()
+
+
+@app.get("/get_user_querries")
+async def get_user_querries():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("select * from user_querry;")
+        rows = cursor.fetchall()
+
+        if not rows:
+            return {"status": "bad", "detail": {"message": "No querries yet"}}
+
+        data = [
+            {
+                "name": row[0],
+                "email": row[1],
+                "phn": row[2],
+                "querry": row[3],
+                "created_at": row[4]
+            }
+            for row in rows
+        ]
+
+        return {"status": "good", "detail": {"message": "user querries fetched", "data": data}}
+
+    except Exception as err:
+        raise_http_error("cannot get user querries", err)
     finally:
         conn.close()

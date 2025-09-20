@@ -86,6 +86,17 @@ def initialize_empty_tables():
             );
         """)
 
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS user_querry (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                name VARCHAR(50),
+                email VARCHAR(60),
+                phn VARCHAR(13),
+                querry VARCAHR(255),
+                created_at DATETIME
+            );
+        """)
+
         conn.commit()
         print("[INFO]: EMPTY TABLES CREATED")
 

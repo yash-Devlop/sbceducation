@@ -1,6 +1,6 @@
 from utils.db_config import get_db_connection
 from datetime import date
-from main import get_today_datetime_sql_format
+from utils.helper import get_today_datetime_sql_format
 
 def add_funds_daily(amount: int):
     conn = get_db_connection()
@@ -14,6 +14,8 @@ def add_funds_daily(amount: int):
     except Exception as e:
         print(f"[INFO]:  Cannnot add daily fund amount: {str(amount)}")
         print(f"[ERR]: {str(e)}")
+    finally:
+        conn.close()
 
 
 def add_salary_hometeacher(amount: int):

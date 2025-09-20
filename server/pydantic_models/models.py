@@ -32,3 +32,9 @@ class Add_funds_request(BaseModel):
 class HistoryRequest(BaseModel):
     start_date: Optional[date] = None
     end_date: Optional[date] = None
+
+class User_querry_request(BaseModel):
+    name: str
+    email: EmailStr
+    phn: str
+    querry: str
