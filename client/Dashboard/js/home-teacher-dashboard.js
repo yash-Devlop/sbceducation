@@ -511,7 +511,7 @@ function logout() {
     deleteCookie('user_role');
     showToast('Logged out successfully', 'success');
     setTimeout(() => {
-        window.location.href = '/Dashboard/templates/login.html';
+        window.location.href = '/client/Dashboard/templates/login.html';
     }, 1000);
 }
 
