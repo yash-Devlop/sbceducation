@@ -5,8 +5,8 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+     font-family: 'Raleway', sans-serif;
+    background: linear-gradient(45deg, #ffefef, #f0b1b1);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -20,7 +20,7 @@ body {
 }
 
 .login-card {
-    background: rgba(255, 255, 255, 0.95);
+   background: linear-gradient(45deg, #ffefef, #ffeaea); 
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 40px 30px;
@@ -35,7 +35,7 @@ body {
 
 .logo {
     font-size: 3rem;
-    color: #667eea;
+    color: #ca203e;
     margin-bottom: 15px;
 }
 
@@ -60,7 +60,7 @@ body {
 
 .type-btn {
     padding: 12px 8px;
-    border: 2px solid #e0e6ed;
+    border: 2px solid #ca203e;
     background: #f8f9fa;
     color: #666;
     border-radius: 12px;
@@ -79,14 +79,14 @@ body {
 }
 
 .type-btn:hover {
-    border-color: #667eea;
+    border-color: #ca203e;
     transform: translateY(-2px);
 }
 
 .type-btn.active {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(228deg, #e5950e, #ca203e);
     color: white;
-    border-color: #667eea;
+    border-color: #ca203e;
 }
 
 .forms-container {
@@ -121,7 +121,7 @@ body {
 
 .input-group i {
     position: absolute;
-    left: 15px;
+    margin-left: 20px;
     color: #999;
     z-index: 1;
 }
@@ -138,7 +138,7 @@ body {
 
 .input-group input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #ca203e;
     background: white;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
@@ -155,13 +155,13 @@ body {
 }
 
 .toggle-password:hover {
-    color: #667eea;
+    color: #ca203e;
 }
 
 .login-btn {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(228deg, #e5950e, #ca203e);
     color: white;
     border: none;
     border-radius: 12px;
@@ -194,7 +194,7 @@ body {
     width: 40px;
     height: 40px;
     border: 4px solid #f3f3f3;
-    border-top: 4px solid #667eea;
+    border-top: 4px solid #ca203e;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin: 0 auto 15px;
