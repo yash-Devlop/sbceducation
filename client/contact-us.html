@@ -21,7 +21,7 @@
     <link rel="manifest" href="assets/img/favicon/site.webmanifest">
     <link rel="mask-icon" href="assets/img/favicon/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="theme-color" content="#ffffff"> 
+    <meta name="theme-color" content="#ffffff">
     <!-- favicon end -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <link rel="stylesheet" href="assets/css/background-animation.css">
@@ -41,51 +41,52 @@
             </ul>
         </div>
     </div>
-    
+
     <!-- header Section -->
     <section class="headerSection wow animate__fadeIn" style="visibility: visible; animation-name: fadeIn;">
         <div class="site-width">
             <div class="headerWrapper">
                 <div class="logoSection">
                     <a href="index.html">
-                        <img src="assets/images/logo-light.svg" alt="SBC Educational & wellfare services" title="SBC Educational & wellfare services" oncontextmenu="return false;">
+                        <img src="assets/images/logo-light.svg" alt="SBC Educational & wellfare services"
+                            title="SBC Educational & wellfare services" oncontextmenu="return false;">
                     </a>
                 </div>
                 <div class="allHeaders">
                     <div class="mainHeaderSection">
                         <div class="headerNav">
                             <ul class="headerMenu">
-                                <li> <a href="index.html" >Home</a></li>
+                                <li> <a href="index.html">Home</a></li>
                                 <li> <a href="https://sbceducational.org/about-us-2/" target="_blank">About Us</a></li>
                                 <li class="hasSub">
                                     <a href="carrer.html">Career</a>
-                                    
+
                                 </li>
                                 <li class="hasSub">
                                     <a href="project.html">Projects</a>
                                 </li>
-                               <li class="hasSub">
+                                <li class="hasSub">
                                     <a href="get-involved.html">Get Involved</a>
-                                    
+
                                 </li>
                                 <li class="hasSub">
                                     <a href="contact-us.html" class="active">Contact Us</a>
-                                   
+
                                 </li>
-                                
+
                             </ul>
                         </div>
                         <div class="headerRightMenuWrap">
                             <ul class="headerRightMenu">
                                 <li>
                                     <div class="defaultBtn ">
-                                        <a href="login.html" class="">
+                                        <a href="/client/Dashboard/templates/login.html" class="">
                                             <span class="headerCareer">Login Dashboard</span>
                                         </a>
                                     </div>
                                 </li>
                             </ul>
-                            
+
                         </div>
                         <div class="hamburger" id="hamburger-11">
                             <span class="line"></span>
@@ -93,9 +94,9 @@
                             <span class="line"></span>
                         </div>
                     </div>
-    
+
                 </div>
-    
+
             </div>
         </div>
     </section>
@@ -124,36 +125,42 @@
                     <div class="col-md-6">
                         <div class="contactForm">
                             <h3 style="margin-bottom: 12px;">Contact Us</h3>
-                            <form method="post" id="contact-form">
+                            <form method="post" id="queryForm">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="FullName">Full Name</label>
-                                            <input type="text" name="name" required="" placeholder="Enter Name">
+                                            <input type="text" name="name" required placeholder="Enter Name">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="Email">Enter Email</label>
-                                            <input type="email" name="email" required="" placeholder="Enter Email">
+                                            <input type="email" name="email" required placeholder="Enter Email">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label for="Phone">Enter Phone</label>
-                                            <input type="text" name="number" required="" placeholder="Enter Phone">
+                                            <input type="text" name="number" required placeholder="Enter Phone" pattern="\d{10}" maxlength="10" title="Enter a valid 10-digit number">
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label for="Message">Your Message</label>
-                                            <textarea rows="5" name="message" required="" placeholder="Your Message"></textarea>
+                                            <textarea rows="5" name="message" required
+                                                placeholder="Your Message"></textarea>
                                         </div>
                                     </div>
-                                    <div class="defaultBtn mt-3 text-center"><a type="button" class="w-100"><span>Submit</span></a></div>
+                                    <div class="defaultBtn mt-3 text-center">
+                                        <button type="submit" class="w-100"><span>Submit</span></button>
+                                    </div>
                                 </div>
+
                             </form>
-    
+                            <!-- For showing confirmation -->
+                            <div id="formResponse" class="text-center mt-2"></div>
+
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -192,12 +199,12 @@
                                     </div>
                                     <div class="ctinfoText">
                                         <h4>Follow us on</h4>
-                                        <a href="javascript:void(0)">Instagram</a> | 
+                                        <a href="javascript:void(0)">Instagram</a> |
                                         <a href="javascript:void(0)">Facebook</a>
                                     </div>
                                 </div>
                             </div>
-    
+
                         </div>
                     </div>
                 </div>
@@ -205,7 +212,7 @@
         </div>
     </section>
 
-   
+
 
     <!-- footer -->
     <footer class="footer-wrp-main position-relative wow animate__fadeIn">
@@ -215,10 +222,12 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="footer-logo-wrp position-relative">
-                                <a href="index.html"><img src="assets/images/logo-light.svg" class="img-fluid" alt="E College"></a>
+                                <a href="index.html"><img src="assets/images/logo-light.svg" class="img-fluid"
+                                        alt="E College"></a>
                             </div>
                             <p>
-                                SBC Educational & Welfare Services is dedicated to transforming lives by providing world-class education to children from India’s most disadvantaged communities.
+                                SBC Educational & Welfare Services is dedicated to transforming lives by providing
+                                world-class education to children from India’s most disadvantaged communities.
                             </p>
                             <!-- <div class="footerContents">
                                 <ul class="footerSocial">
@@ -236,7 +245,7 @@
                                 <a href="about-us.html">About Us</a>
                                 <a href="get-involved.html">Get Involved</a>
                                 <a href="contact-us.html">Contact Us</a>
-                               
+
                             </div>
                         </div>
                         <div class="col-md-3">
@@ -255,7 +264,7 @@
                                     <li>
                                         <a href="#" target="_blank">
                                             <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
-                                            <span>Noida  Uttar Pradesh - 201301</span>
+                                            <span>Noida Uttar Pradesh - 201301</span>
                                         </a>
                                     </li>
                                     <li class="footer-address-link">
@@ -289,14 +298,16 @@
                     <div class="row">
 
                         <div class="col-md-6 col-lg-6 ">
-                            <p class="copy-txt text-center text-md-start">Copyright © <script>  document.write(new Date().getFullYear())
-                            </script> <span style="color: #fab239;">SBC Educational</span> | All Rights Reserved
+                            <p class="copy-txt text-center text-md-start">Copyright ©
+                                <script>  document.write(new Date().getFullYear())
+                                </script> <span style="color: #fab239;">SBC Educational</span> | All Rights Reserved
                             </p>
-                           
+
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex flex-end">
-                                <a href="https://www.appzglobaltech.com/" title="Appz Global Tech Pvt.Ltd" target="_blank" style="color: #ddd; font-size: 14px; margin-right: 80px;">
+                                <a href="https://www.appzglobaltech.com/" title="Appz Global Tech Pvt.Ltd"
+                                    target="_blank" style="color: #ddd; font-size: 14px; margin-right: 80px;">
                                     <!-- <img src="images/akslogo.png" alt="Appz Global Tech Pvt.Ltd" title="Appz Global Tech Pvt.Ltd"> -->
                                     Powered by Appz Global Tech
                                 </a>
@@ -325,7 +336,7 @@
     <script src="assets/js/jquery.waypoints.min.js"></script>
     <script src="assets/js/inview.min.js"></script>
     <script type="text/javascript">
-       function inviewExample() {
+        function inviewExample() {
             var $example = $("#inview-example");
             var inview;
 
@@ -344,7 +355,7 @@
                                 step: function () {
                                     $this.text(Math.ceil(this.Counter));
                                 },
-                                complete: function() {
+                                complete: function () {
                                     $this.text(val); // Ensure the exact final value is displayed
                                 }
                             });
@@ -354,9 +365,47 @@
             }
         }
 
-    $(window).on("load", function () {
-        inviewExample();
-    });
+        $(window).on("load", function () {
+            inviewExample();
+        });
+    </script>
+    <script>
+        document.getElementById("queryForm").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const responseBox = document.getElementById("formResponse");
+
+            // collect and trim data
+            const data = {
+                name: form.name.value.trim(),
+                email: form.email.value.trim(),
+                phn: form.number.value.trim(),
+                querry: form.message.value.trim()
+            };
+
+            try {
+                const res = await fetch("http://localhost:8000/user_querry", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+
+                if (result.status === "good" && result.detail?.message) {
+                    responseBox.textContent = result.detail.message;
+                    responseBox.style.color = "green";
+                    form.reset(); // clear form
+                } else {
+                    responseBox.textContent = "Something went wrong.";
+                    responseBox.style.color = "red";
+                }
+            } catch (err) {
+                responseBox.textContent = "Error: " + err.message;
+                responseBox.style.color = "red";
+            }
+        });
     </script>
 </body>
 
