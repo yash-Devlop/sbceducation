@@ -507,6 +507,8 @@ function toggleMobileMenu() {
 // Logout function
 function logout() {
     deleteCookie('access_token');
+    deleteCookie('user_name');
+    deleteCookie('user_role');
     showToast('Logged out successfully', 'success');
     setTimeout(() => {
         window.location.href = '/Dashboard/templates/login.html';

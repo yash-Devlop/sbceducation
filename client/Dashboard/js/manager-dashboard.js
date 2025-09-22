@@ -56,9 +56,16 @@ function redirectToLogin() {
 
 // Logout function
 function logout() {
-    document.cookie = 'access_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    redirectToLogin();
+    if (confirm('Are you sure you want to logout?')) {
+        // remove cookies by setting them expired
+        document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict";
+        document.cookie = "user_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict";
+        document.cookie = "user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict";
+
+        window.location.href = '/client/Dashboard/templates/login.html';
+    }
 }
+
 
 // Initialize navigation
 function initializeNavigation() {

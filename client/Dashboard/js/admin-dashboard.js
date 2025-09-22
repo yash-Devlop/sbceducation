@@ -557,11 +557,15 @@ function resetForm() {
 // Logout functionality
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
+        // remove cookies by setting them expired
         document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict";
+        document.cookie = "user_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict";
+        document.cookie = "user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; Secure; SameSite=Strict";
 
         window.location.href = '/client/Dashboard/templates/login.html';
     }
 }
+
 
 
 // Utility Functions

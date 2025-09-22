@@ -191,8 +191,8 @@ const BASE_URL = 'http://localhost:8000';
         function showHelp() {
             const helpMessage = `
 Contact Information:
-📞 Phone: +1-234-567-8900
-📧 Email: support@hopefoundation.org
+📞 Phone: +91 8888888888
+📧 Email: contact@sbceducational.org
 🕒 Support Hours: 9:00 AM - 6:00 PM (Mon-Fri)
 
 Login Issues:
@@ -201,7 +201,7 @@ Login Issues:
 
 For technical support, please include your role and employee ID in your message.
             `;
-            alert(helpMessage);
+            alert(helpMessage);s
         }
 
         // Logout function (can be called from other pages)
