@@ -52,13 +52,17 @@ body {
 }
 
 .login-type-selector {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 30px;
+    justify-content: center;
 }
 
 .type-btn {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    max-width: calc(50% - 4px);
     padding: 12px 8px;
     border: 2px solid #ca203e;
     background: #f8f9fa;
@@ -76,6 +80,13 @@ body {
 
 .type-btn i {
     font-size: 1.2rem;
+}
+
+.type-btn[data-type="branch"] {
+    min-width: 100%;
+    max-width: 100%;
+    flex-direction: row;
+    justify-content: center;
 }
 
 .type-btn:hover {
@@ -250,6 +261,13 @@ body {
 
 .help-links a:hover {
     text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .type-btn[data-type="branch"] {
+        min-width: 100%;
+        max-width: 100%;
+    }
 }
 
 @media (max-width: 480px) {

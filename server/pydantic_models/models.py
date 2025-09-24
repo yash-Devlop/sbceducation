@@ -11,6 +11,9 @@ class emp_login_request(BaseModel):
     pwd: str
     role: str
 
+# class Get_commison_request(BaseModel):
+#     emp_id
+
 class create_emp_request(BaseModel):
     name: str
     fname: str
@@ -24,6 +27,23 @@ class create_emp_request(BaseModel):
     phn: str
     pwd: str
     role: str
+    manager_id: Optional[str] = None
+
+
+class create_manager_request(BaseModel):
+    name: str
+    fname: str
+    mname: str
+    dob: date
+    addr: str
+    city: str
+    district: str
+    state: str
+    email: EmailStr
+    phn: str
+    pwd: str
+
+
 
 class Add_funds_request(BaseModel):
     amount: int

@@ -2,9 +2,6 @@ from fastapi import FastAPI, HTTPException, status, Security, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import os
-import random
-import string
-import pytz
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from pathlib import Path
@@ -13,13 +10,9 @@ from jose import jwt, JWTError, ExpiredSignatureError
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from utils.db_config import get_db_connection, initialize_db
 from utils.api_error import raise_http_error
-from utils.scheduler import add_funds_daily, add_salary_hometeacher
-from utils.helper import generate_emp_id, get_today_datetime_sql_format
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-from pydantic_models.models import Admin_login_request, emp_login_request, create_emp_request, Add_funds_request, HistoryRequest, User_querry_request
+from utils.helper import generate_emp_id, get_role_from_emp_id, get_today_datetime_sql_format
+from pydantic_models.models import Admin_login_request, emp_login_request, create_emp_request, create_manager_request, Add_funds_request, HistoryRequest, User_querry_request
 from datetime import datetime, timezone, timedelta
-from zoneinfo import ZoneInfo
 
 load_dotenv()
 
@@ -38,7 +31,7 @@ async def get_login_role(credentials: HTTPAuthorizationCredentials = Security(se
         role = payload.get("role")
         print(f"role: {role}")
 
-        if role not in ["admin", "manager", "field-manager", "home-teacher"]:
+        if role not in ["admin", "manager", "field-manager", "home-teacher", "branch"]:
             print("except")
             raise HTTPException(
                 
@@ -69,26 +62,10 @@ allowed_hierarchy = {
 
 #=========================================================
 
-scheduler = BackgroundScheduler()
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("[INFO]:  Starting up: Initialize resources")
     await asyncio.to_thread(initialize_db)
-
-    scheduler.add_job(
-        func=lambda: add_funds_daily(50),
-        trigger=CronTrigger(hour=4, minute=0, timezone=ZoneInfo("Asia/Kolkata")),
-        id="salary_job",
-        replace_existing=True
-    )
-    scheduler.add_job(
-        func=lambda: add_salary_hometeacher(4950),
-        trigger=CronTrigger(hour=4, minute=30, timezone=ZoneInfo("Asia/Kolkata")),
-        id="salary_job",
-        replace_existing=True
-    )
-    scheduler.start()
     
     try:
         yield
@@ -149,7 +126,7 @@ async def admin_login(data: Admin_login_request):
 
 @app.post("/emp_login")
 async def emp_login(data: emp_login_request):
-    if data.role not in ["manager", "field-manager", "home-teacher"]:
+    if data.role not in ["manager", "field-manager", "home-teacher", "branch"]:
         raise_http_error("Wrong role selected")
 
     conn = get_db_connection()
@@ -163,7 +140,7 @@ async def emp_login(data: emp_login_request):
 
         row = cursor.fetchone()
         if not row:
-            return {"status": "bad", "matches": "invalid-credentials"}
+            return {"status": "bad", "matches": "Invalid credentials"}
 
         emp_id, emp_name = row
 
@@ -196,16 +173,10 @@ async def create_employee(data: create_emp_request, token_data: dict = Depends(g
     creator_role = token_data.get("role")
     creator_id = token_data.get("emp_id")
 
-    print(f"creator_role: {creator_role}")
-    print(f"creator_id: {creator_id}")
-
-    if creator_role not in allowed_hierarchy:
-        raise HTTPException(status_code=403, detail=f"{creator_role} cannot create any employees")
-
-    if data.role not in allowed_hierarchy[creator_role]:
-        raise HTTPException(status_code=403, detail=f"{creator_role} cannot create {data.role}")
-
-    manager_id = None if data.role == "manager" else creator_id
+    if creator_role != "manager":
+        raise_http_error(f"Only manager can create {data.role}")
+    if data.role not in ["field-manager", "home-teacher"]:
+        raise_http_error("Invalid role provided")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -213,33 +184,122 @@ async def create_employee(data: create_emp_request, token_data: dict = Depends(g
     try:
         new_emp_id = generate_emp_id(data.role)
         today_datetime = get_today_datetime_sql_format()
-        cursor.execute(
-            """
-            INSERT INTO employees (id, name, fname, mname, DOB, addr, city, district, state, email, phn, password, role, manager_id, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            (new_emp_id, data.name, data.fname, data.mname, data.dob, data.addr, data.city, data.district, data.state, data.email, data.phn, data.pwd, data.role, manager_id, today_datetime)
-        )
 
-        funds_to_add = 0
-        if creator_role == "manager" and data.role == "field-manager":
-            funds_to_add = 50
-        elif creator_role == "field-manager" and data.role == "home-teacher":
-            funds_to_add = 150
+        cursor.execute("SELECT funds from employees where id = %s", (creator_id,))
+        total_funds = cursor.fetchone()[0]
 
-        if funds_to_add > 0:
+        if data.role == "field-manager":
+            if total_funds < 950:
+                return {"status": "bad", "detail": {"message": "Insufficient funds"}}
             cursor.execute(
-                "UPDATE employees SET funds = IFNULL(funds,0) + %s WHERE id = %s",
-                (funds_to_add, creator_id)
+                """
+                INSERT INTO employees (id, name, fname, mname, DOB, addr, city, district, state, email, phn, password, role, manager_id, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (new_emp_id, data.name, data.fname, data.mname, data.dob, data.addr, data.city, data.district, data.state, data.email, data.phn, data.pwd, data.role, creator_id, today_datetime)
+            )
+
+            cursor.execute("UPDATE employees SET funds = funds - %s WHERE id = %s", (950, creator_id))
+
+            cursor.execute(
+                """
+                INSERT INTO commisions (manager_id, manager_commision, created_role, created_id, registered_at)
+                VALUES(%s, %s, %s, %s, %s)
+                """, (creator_id, 50, data.role, new_emp_id, today_datetime)
+            )
+        
+        if data.role == "home-teacher":
+            if total_funds < 4950:
+                return {"status": "bad", "detail": {"message": "Insufficient funds"}}
+            cursor.execute(
+                """
+                INSERT INTO employees (id, name, fname, mname, DOB, addr, city, district, state, email, phn, password, role, manager_id, created_at)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """,
+                (new_emp_id, data.name, data.fname, data.mname, data.dob, data.addr, data.city, data.district, data.state, data.email, data.phn, data.pwd, data.role, data.manager_id, today_datetime)
+            )
+
+            cursor.execute("UPDATE employees SET funds = funds - %s WHERE id = %s", (4950, creator_id))
+
+            cursor.execute(
+                """
+                INSERT INTO commisions (manager_id, field_manager_id, manager_commision, field_manager_commision, created_role, created_id, registered_at)
+                VALUES(%s, %s, %s, %s, %s, %s, %s)
+                """, (creator_id, data.manager_id, 50, 150, data.role, new_emp_id, today_datetime)
             )
 
         conn.commit()
-        return {"status": "good", "detail": {"message": f"{data.role} created successfully"}}
+        return {"status": "good", "detail": {"message": f"{data.role} created successfully", "role": data.role, "name": data.name, "email": data.email, "password": data.pwd}}
 
     except Exception as err:
         conn.rollback()
+        print(data)
+        print(err)
         raise raise_http_error("Cannot create employee", err)
 
+    finally:
+        conn.close()
+
+@app.post("/create_branch_emp")
+async def create_branch_emp(data: create_emp_request, token_data: dict = Depends(get_login_role)):
+
+    creator_role = token_data.get("role")
+
+    if data.role != "branch" and creator_role != "admin":
+        raise_http_error(f"Cannot create {data.role}.")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+
+    try:
+        new_emp_id = generate_emp_id(data.role)
+        today_datetime = get_today_datetime_sql_format()
+
+        cursor.execute(
+            """
+            INSERT INTO employees (id, name, fname, mname, DOB, addr, city, district, state, email, phn, password, role, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (new_emp_id, data.name, data.fname, data.mname, data.dob, data.addr, data.city, data.district, data.state, data.email, data.phn, data.pwd, data.role, today_datetime)
+        )
+        conn.commit()
+
+        return {"status": "good", "detail": {"message": "Branch employee created.", "role": data.role, "name": data.name, "email": data.email, "password": data.pwd}}
+
+    except Exception as err:
+        raise_http_error("Cannot create branch", err)
+    finally:
+        conn.close()
+
+@app.post("/create_manager")
+async def create_manager(data: create_manager_request, token_data: dict = Depends(get_login_role)):
+
+    creater_role = token_data.get("role")
+
+    if creater_role != "admin":
+        raise_http_error("Only admin can make managers")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        new_emp_id = generate_emp_id("manager")
+        today_datetime = get_today_datetime_sql_format()
+        cursor.execute(
+            """
+            INSERT INTO employees (id, name, fname, mname, DOB, addr, city, district, state, email, phn, password, role, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """,
+            (new_emp_id, data.name, data.fname, data.mname, data.dob, data.addr, data.city, data.district, data.state, data.email, data.phn, data.pwd, "manager", today_datetime)
+        )
+        conn.commit()
+        return {"status": "good", "detail": {"message": "Manager created successfully"}}
+
+    except Exception as err:
+        conn.rollback()
+        print(err)
+        raise_http_error("Cannot create manager", err)
     finally:
         conn.close()
 
@@ -249,6 +309,9 @@ async def add_funds(data: Add_funds_request, token_data: dict = Depends(get_logi
     sender_id = token_data.get("emp_id")
     sender_role = token_data.get("role")
 
+    if sender_id != "admin" and sender_role != "admin":
+        raise_http_error("Only admin can send funds")
+
     if data.amount <= 0:
         raise HTTPException(status_code=400, detail={"message": "Amount must be greater than 0"})
 
@@ -256,52 +319,16 @@ async def add_funds(data: Add_funds_request, token_data: dict = Depends(get_logi
     cursor = conn.cursor()
 
     try:
-        # ✅ Check receiver exists
         cursor.execute("SELECT role, manager_id FROM employees WHERE id = %s", (data.receiver_id,))
         receiver = cursor.fetchone()
         if not receiver:
             raise HTTPException(status_code=404, detail={"message": "Receiver not found"})
-        receiver_role, receiver_manager_id = receiver
 
-        # ✅ Handle non-admin senders
-        if sender_role != "admin":
-            cursor.execute("SELECT role, funds FROM employees WHERE id = %s", (sender_id,))
-            sender = cursor.fetchone()
-            if not sender:
-                raise HTTPException(status_code=404, detail={"message": "Sender not found"})
-            db_sender_role, sender_funds = sender
-            sender_funds = sender_funds or 0
-
-            if sender_funds < data.amount:
-                raise HTTPException(status_code=400, detail={"message": "Insufficient funds"})
-
-        # ✅ Role-based transfer rules
-        if sender_role == "admin":
-            # admin can fund anyone, no checks needed
-            pass
-        elif sender_role == "manager":
-            if receiver_manager_id != sender_id or receiver_role != "field-manager":
-                raise HTTPException(status_code=403, detail={"message": "Manager can only fund their own field-managers"})
-        elif sender_role == "field-manager":
-            if receiver_manager_id != sender_id or receiver_role != "home-teacher":
-                raise HTTPException(status_code=403, detail={"message": "Field-manager can only fund their own home-teachers"})
-        else:
-            raise HTTPException(status_code=403, detail={"message": f"{sender_role} cannot transfer funds"})
-
-        # ✅ Deduct from sender (only if not admin)
-        if sender_role != "admin":
-            cursor.execute(
-                "UPDATE employees SET funds = funds - %s WHERE id = %s",
-                (data.amount, sender_id)
-            )
-
-        # ✅ Add to receiver
         cursor.execute(
             "UPDATE employees SET funds = funds + %s WHERE id = %s",
             (data.amount, data.receiver_id)
         )
 
-        # ✅ Log transfer history
         today_datetime = get_today_datetime_sql_format()
         cursor.execute(
             """
@@ -309,7 +336,7 @@ async def add_funds(data: Add_funds_request, token_data: dict = Depends(get_logi
             VALUES (%s, %s, %s, %s)
             """,
             (
-                None if sender_role == "admin" else sender_id,  # allow NULL for admin
+                None,
                 data.amount,
                 data.receiver_id,
                 today_datetime
@@ -326,6 +353,7 @@ async def add_funds(data: Add_funds_request, token_data: dict = Depends(get_logi
         raise
     except Exception as err:
         conn.rollback()
+        print(err)
         raise raise_http_error("cannot add funds", err)
     finally:
         conn.close()
@@ -345,48 +373,42 @@ async def funds_transfer_history(data: HistoryRequest, token_data: dict = Depend
         start_date = data.start_date
         end_date = data.end_date
 
-        # ----------------------
-        # 🔹 Handle date logic
-        # ----------------------
-        if role != "admin":
-            if start_date and not end_date:
-                # if only start_date → end_date = min(start+2 months, today)
-                max_end = start_date + timedelta(days=60)
-                end_date = min(max_end, today)
+        if not start_date and not end_date:
+            end_date = today
+            start_date = today - timedelta(days=30)
 
-            elif start_date and end_date:
-                # validate range ≤ 2 months
-                if (end_date - start_date).days > 62:  # allow ~2 months
-                    raise HTTPException(
-                        status_code=400,
-                        detail={"message": "Date range cannot exceed 2 months"}
-                    )
-                # also disallow future
-                if end_date > today:
-                    end_date = today
+        elif start_date and not end_date:
+            max_end = start_date + timedelta(days=60)
+            end_date = min(max_end, today)
 
-            elif not start_date and not end_date:
-                # default → last 10 days
+        elif start_date and end_date:
+            if (end_date - start_date).days > 62:
+                raise HTTPException(
+                    status_code=400,
+                    detail={"message": "Date range cannot exceed 2 months"}
+                )
+            # disallow future
+            if end_date > today:
                 end_date = today
-                start_date = today - timedelta(days=10)
 
-        # For admin → no restriction
+
         where_clause = ""
         params = []
-        if role == "admin":
-            if start_date and end_date:
-                where_clause = "WHERE DATE(f.transferred_at) BETWEEN %s AND %s"
-                params = [start_date, end_date]
-        else:
-            where_clause = "WHERE (f.sender_id = %s OR f.reciever_id = %s)"
-            params = [emp_id, emp_id]
-            if start_date and end_date:
-                where_clause += " AND DATE(f.transferred_at) BETWEEN %s AND %s"
-                params.extend([start_date, end_date])
 
-        # ----------------------
-        # 🔹 Queries
-        # ----------------------
+        if role in ["admin", "branch"]:
+            where_clause = "WHERE DATE(f.transferred_at) BETWEEN %s AND %s"
+            params = [start_date, end_date]
+
+        elif role == "manager":
+            where_clause = """
+                WHERE (f.sender_id = %s OR f.reciever_id = %s)
+                AND DATE(f.transferred_at) BETWEEN %s AND %s
+            """
+            params = [emp_id, emp_id, start_date, end_date]
+
+        else:
+            return {"status": "bad", "detail": {"message": f"{role} cannot seetransaction history.", "transactions": []}}
+
         query = f"""
             SELECT 
                 f.id,
@@ -403,13 +425,10 @@ async def funds_transfer_history(data: HistoryRequest, token_data: dict = Depend
             ORDER BY f.transferred_at DESC
         """
 
-        if role != "admin":
-            query += " LIMIT 30"
-
         cursor.execute(query, tuple(params))
         history = cursor.fetchall()
 
-        return {"transactions": history}
+        return {"status": "good", "detail": {"transactions": history}}
 
     except HTTPException:
         raise
@@ -419,11 +438,73 @@ async def funds_transfer_history(data: HistoryRequest, token_data: dict = Depend
         conn.close()
 
 
+
+@app.get("/get_commisions/{emp_id}")
+async def get_commisions(emp_id: str, token_data: dict = Depends(get_login_role)):
+    user_role = token_data.get("role")
+    user_id = token_data.get("emp_id")
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)  # return rows as dicts
+
+    try:
+        # ADMIN or requesting own commissions
+        if user_role == "admin" or user_role == "branch " or user_id == emp_id:
+            cursor.execute(
+                """
+                SELECT * 
+                FROM commisions 
+                WHERE manager_id = %s OR field_manager_id = %s
+                """,
+                (emp_id, emp_id)
+            )
+            rows = cursor.fetchall()
+            return {"status": "good", "detail": rows}
+
+        # MANAGER
+        elif user_role == "manager":
+            cursor.execute(
+                """
+                SELECT * 
+                FROM commisions 
+                WHERE manager_id = %s
+                """,
+                (user_id,)
+            )
+            rows = cursor.fetchall()
+            return {"status": "good", "detail": rows}
+
+        # FIELD MANAGER
+        elif user_role == "field-manager":
+            cursor.execute(
+                """
+                SELECT * 
+                FROM commisions 
+                WHERE field_manager_id = %s
+                """,
+                (user_id,)
+            )
+            rows = cursor.fetchall()
+            return {"status": "good", "detail": rows}
+
+        else:
+            return {"status": "bad", "detail": {"message": "You are not allowed to view commissions"}}
+
+    except Exception as err:
+        raise_http_error("Cannot get commission list", err)
+
+    finally:
+        conn.close()
+
+
+            
+
 @app.get("/get_emp_funds")
 async def get_emp_funds(token_data: dict = Depends(get_login_role)):
     emp_id = token_data.get("emp_id")
-    if emp_id == "admin":
-        raise_http_error("cannot get funds for admin")
+    role = token_data.get("role")
+    if role != "manager":
+        raise_http_error(f"cannot get funds for {role}")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -433,7 +514,7 @@ async def get_emp_funds(token_data: dict = Depends(get_login_role)):
 
         amount = cursor.fetchone()
         if not amount:
-            raise_http_error("cannot find employee")
+            raise_http_error("Cannot find employee")
         return {"status": "good", "detail": {"message": "Funds fetched succesully", "funds": amount[0]}}
     except Exception as err:
         raise_http_error("cannot get employee funds", err)
@@ -442,6 +523,7 @@ async def get_emp_funds(token_data: dict = Depends(get_login_role)):
 
 @app.get("/get_emp_details/{emp_id}")
 async def get_emp_details(emp_id: str, token_data: dict = Depends(get_login_role)):
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -484,7 +566,6 @@ async def get_all_employees(token_data: dict = Depends(get_login_role)):
     
     try:
         if role == "admin":
-            # Admin can see all employees
             cursor.execute("""
                 SELECT e.id, e.name, e.email, e.role, e.funds, e.created_at,
                        m.name as manager_name
@@ -686,5 +767,220 @@ async def get_user_querries():
 
     except Exception as err:
         raise_http_error("cannot get user querries", err)
+    finally:
+        conn.close()
+
+
+# Add this new endpoint to your existing FastAPI application
+
+@app.get("/get_field_managers_under_manager/{manager_id}")
+async def get_field_managers_under_manager(manager_id: str, token_data: dict = Depends(get_login_role)):
+    """
+    Get all field managers under a specific manager
+    Only the manager themselves or admin can access this data
+    """
+    user_role = token_data.get("role")
+    user_id = token_data.get("emp_id")
+    
+    # Check authorization
+    if user_role != "admin" and user_id != manager_id:
+        raise HTTPException(
+            status_code=403, 
+            detail={"message": "You can only view your own field managers"}
+        )
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        # Get all field managers under this manager
+        cursor.execute("""
+            SELECT id, name, email, funds, created_at
+            FROM employees 
+            WHERE role = 'field-manager' AND manager_id = %s
+            ORDER BY created_at DESC
+        """, (manager_id,))
+        
+        field_managers = cursor.fetchall()
+        
+        # Get count of home teachers under each field manager
+        for fm in field_managers:
+            cursor.execute("""
+                SELECT COUNT(*) as count
+                FROM employees 
+                WHERE role = 'home-teacher' AND manager_id = %s
+            """, (fm['id'],))
+            
+            count_result = cursor.fetchone()
+            fm['home_teachers_count'] = count_result['count'] if count_result else 0
+        
+        return {
+            "status": "success", 
+            "field_managers": field_managers,
+            "total_count": len(field_managers)
+        }
+        
+    except Exception as err:
+        raise_http_error("Cannot fetch field managers", err)
+    finally:
+        conn.close()
+
+
+@app.get("/get_manager_monthly_commissions/{manager_id}/{year}/{month}")
+async def get_manager_monthly_commissions(
+    manager_id: str, 
+    year: int, 
+    month: int, 
+    token_data: dict = Depends(get_login_role)
+):
+    """
+    Get detailed commission breakdown for a manager for a specific month and year
+    """
+    user_role = token_data.get("role")
+    user_id = token_data.get("emp_id")
+    
+    # Check authorization
+    if user_role not in ["admin", "branch"] and user_id != manager_id:
+        raise HTTPException(
+            status_code=403, 
+            detail={"message": "You can only view your own commission details"}
+        )
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        # Get commissions for the specific month and year
+        cursor.execute("""
+            SELECT 
+                c.*,
+                e.name as created_employee_name
+            FROM commisions c
+            LEFT JOIN employees e ON c.created_id = e.id
+            WHERE c.manager_id = %s 
+            AND YEAR(c.registered_at) = %s 
+            AND MONTH(c.registered_at) = %s
+            ORDER BY c.registered_at DESC
+        """, (manager_id, year, month))
+        
+        commissions = cursor.fetchall()
+        
+        # Calculate totals
+        total_commission = sum(c['manager_commision'] or 0 for c in commissions)
+        field_manager_count = len([c for c in commissions if c['created_role'] == 'field-manager'])
+        home_teacher_count = len([c for c in commissions if c['created_role'] == 'home-teacher'])
+        
+        return {
+            "status": "success",
+            "month": month,
+            "year": year,
+            "commissions": commissions,
+            "summary": {
+                "total_commission": total_commission,
+                "field_managers_recruited": field_manager_count,
+                "home_teachers_recruited": home_teacher_count,
+                "total_registrations": len(commissions)
+            }
+        }
+        
+    except Exception as err:
+        raise_http_error("Cannot fetch monthly commissions", err)
+    finally:
+        conn.close()
+
+
+@app.post("/get_manager_commission_history")
+async def get_manager_commission_history(
+    data: HistoryRequest,
+    token_data: dict = Depends(get_login_role)
+):
+    """
+    Get commission history for a manager with date filtering
+    """
+    user_role = token_data.get("role")
+    user_id = token_data.get("emp_id")
+    
+    if user_role not in ["admin", "branch", "manager"]:
+        raise HTTPException(
+            status_code=403,
+            detail={"message": "Insufficient permissions"}
+        )
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    try:
+        today = datetime.today().date()
+        start_date = data.start_date
+        end_date = data.end_date
+        
+        # Set default date range if not provided
+        if not start_date and not end_date:
+            end_date = today
+            start_date = today - timedelta(days=90)  # Last 3 months
+        elif start_date and not end_date:
+            max_end = start_date + timedelta(days=90)
+            end_date = min(max_end, today)
+        elif start_date and end_date:
+            if (end_date - start_date).days > 365:  # Max 1 year range
+                raise HTTPException(
+                    status_code=400,
+                    detail={"message": "Date range cannot exceed 1 year"}
+                )
+            if end_date > today:
+                end_date = today
+        
+        where_clause = ""
+        params = []
+        
+        if user_role in ["admin", "branch"]:
+            where_clause = "WHERE DATE(c.registered_at) BETWEEN %s AND %s"
+            params = [start_date, end_date]
+        else:  # manager
+            where_clause = """
+                WHERE c.manager_id = %s 
+                AND DATE(c.registered_at) BETWEEN %s AND %s
+            """
+            params = [user_id, start_date, end_date]
+        
+        query = f"""
+            SELECT 
+                c.*,
+                e.name as created_employee_name,
+                m.name as manager_name
+            FROM commisions c
+            LEFT JOIN employees e ON c.created_id = e.id
+            LEFT JOIN employees m ON c.manager_id = m.id
+            {where_clause}
+            ORDER BY c.registered_at DESC
+        """
+        
+        cursor.execute(query, tuple(params))
+        history = cursor.fetchall()
+        
+        # Calculate summary
+        total_commission = sum(h['manager_commision'] or 0 for h in history)
+        field_managers = len([h for h in history if h['created_role'] == 'field-manager'])
+        home_teachers = len([h for h in history if h['created_role'] == 'home-teacher'])
+        
+        return {
+            "status": "success",
+            "commission_history": history,
+            "summary": {
+                "total_commission": total_commission,
+                "field_managers_recruited": field_managers,
+                "home_teachers_recruited": home_teachers,
+                "total_registrations": len(history),
+                "date_range": {
+                    "start_date": start_date.isoformat(),
+                    "end_date": end_date.isoformat()
+                }
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as err:
+        raise_http_error("Cannot fetch commission history", err)
     finally:
         conn.close()

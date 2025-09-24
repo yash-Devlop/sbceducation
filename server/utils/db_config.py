@@ -74,15 +74,15 @@ def initialize_empty_tables():
             )
         """)
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS salary_history (
+            CREATE TABLE IF NOT EXISTS commisions(
                 id INT AUTO_INCREMENT PRIMARY KEY,
-                emp_id VARCHAR(26) NOT NULL,
-                salary_amount INT NOT NULL,
-                salary_month DATE NOT NULL,
-                credited_at DATETIME,
-                status ENUM('credited','missed') DEFAULT 'missed',
-                CONSTRAINT fk_emp_salary FOREIGN KEY (emp_id) REFERENCES employees(id) ON DELETE CASCADE,
-                UNIQUE(emp_id, salary_month)
+                manager_id VARCHAR(26) NOT NULL,
+                field_manager_id VARCHAR(26),
+                manager_commision INT,
+                field_manager_commision INT,
+                created_role VARCHAR(20),
+                created_id VARCHAR(26),
+                registered_at DATETIME
             );
         """)
 
@@ -92,7 +92,7 @@ def initialize_empty_tables():
                 name VARCHAR(50),
                 email VARCHAR(60),
                 phn VARCHAR(13),
-                querry VARCAHR(255),
+                querry VARCHAR(255),
                 created_at DATETIME
             );
         """)

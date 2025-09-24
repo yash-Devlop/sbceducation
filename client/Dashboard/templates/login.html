@@ -38,11 +38,14 @@
                     <i class="fas fa-chalkboard-teacher"></i>
                     Home Teacher
                 </button>
+                <button type="button" class="type-btn" data-type="branch">
+                    <i class="fas fa-building"></i>
+                    Branch
+                </button>
             </div>
 
             <!-- Login Forms -->
             <div class="forms-container">
-                <!-- Admin Login Form -->
                 <form id="admin-form" class="login-form active">
                     <div class="form-group">
                         <label for="admin-username">Username</label>
@@ -56,7 +59,8 @@
                         <div class="input-group">
                             <i class="fas fa-lock"></i>
                             <input type="password" id="admin-password" name="password" required>
-                            <button type="button" class="toggle-password" onclick="togglePassword('admin-password')"></i>
+                            <button type="button" class="toggle-password" onclick="togglePassword('admin-password')">
+                                <i class="fas fa-eye"></i>
                             </button>
                         </div>
                     </div>
@@ -138,6 +142,31 @@
                         Login as Home Teacher
                     </button>
                 </form>
+
+                <!-- New Branch Login Form -->
+                <form id="branch-form" class="login-form">
+                    <div class="form-group">
+                        <label for="branch-email">Email</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="branch-email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="branch-password">Password</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="branch-password" name="password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('branch-password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login as Branch
+                    </button>
+                </form>
             </div>
 
             <!-- Loading Indicator -->
@@ -161,7 +190,5 @@
     </div>
 
     <script src="/client/Dashboard/js/login.js"></script>
-
-   
 </body>
 </html>

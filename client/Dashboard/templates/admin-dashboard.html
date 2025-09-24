@@ -6,43 +6,97 @@
     <title>Sbeducational - Admin Dashboard</title>
     <link rel="stylesheet" href="/client/Dashboard/css/admin-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <!-- Navigation Header -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <img src="client/assets/images/logo-light.svg" alt="">
-                <span>NGO Admin Portal</span>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-hands-helping"></i>
+                <span class="logo-text">Sbeducational</span>
             </div>
-            <div class="nav-menu">
-                <a href="#dashboard" class="nav-link active" data-section="dashboard">
-                    <i class="fas fa-tachometer-alt"></i> Dashboard
-                </a>
-                <a href="#employees" class="nav-link" data-section="employees">
-                    <i class="fas fa-users"></i> Employees
-                </a>
-                <a href="#hierarchy" class="nav-link" data-section="hierarchy">
-                    <i class="fas fa-sitemap"></i> Hierarchy
-                </a>
-                <a href="#funds" class="nav-link" data-section="funds">
-                    <i class="fas fa-money-bill-wave"></i> Funds
-                </a>
-                <a href="#create" class="nav-link" data-section="create">
-                    <i class="fas fa-user-plus"></i> Add Employee
-                </a>
-            </div>
-            <div class="nav-user">
-                <span class="user-name">Admin</span>
-                <button class="logout-btn" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-            </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
         </div>
-    </nav>
+
+        <nav class="sidebar-nav">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#employees" class="nav-link" data-section="employees">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Employees</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#hierarchy" class="nav-link" data-section="hierarchy">
+                        <i class="fas fa-sitemap"></i>
+                        <span class="nav-text">Hierarchy</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#funds" class="nav-link" data-section="funds">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span class="nav-text">Funds</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#commissions" class="nav-link" data-section="commissions">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">Commission Reports</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#create" class="nav-link" data-section="create">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="nav-text">Add Employee</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="user-details">
+                    <span class="user-name">Admin</span>
+                    <span class="user-role">Administrator</span>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" id="mainContent">
+        <!-- Mobile Header -->
+        <header class="mobile-header">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="mobile-logo">
+                <i class="fas fa-hands-helping"></i>
+                <span>Sbeducational</span>
+            </div>
+            <div class="mobile-user">
+                <span>Admin</span>
+            </div>
+        </header>
+
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="content-section active">
             <div class="section-header">
@@ -110,6 +164,7 @@
                         <option value="manager">Managers</option>
                         <option value="field-manager">Field Managers</option>
                         <option value="home-teacher">Home Teachers</option>
+                        <option value="branch">Branch</option>
                     </select>
                 </div>
             </div>
@@ -200,6 +255,62 @@
             </div>
         </section>
 
+        <!-- Commission Reports Section -->
+        <section id="commissions-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-chart-line"></i> Commission Reports</h1>
+                <p>Generate and download commission reports for managers and field managers</p>
+            </div>
+            
+            <div class="commissions-grid">
+                <div class="commission-card">
+                    <h3><i class="fas fa-search"></i> Find Employee for Commission Report</h3>
+                    <div class="commission-search-form">
+                        <input type="text" id="commission-emp-search" placeholder="Enter Employee ID" class="form-input">
+                        <button onclick="searchEmployeeCommission()" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                    <div id="commission-employee-details" class="employee-details" style="display: none;">
+                        <!-- Employee details for commission will be shown here -->
+                    </div>
+                </div>
+                
+                <div class="commission-card">
+                    <h3><i class="fas fa-download"></i> Generate Report</h3>
+                    <div class="commission-actions">
+                        <button onclick="generateCommissionPDF()" class="btn btn-success" disabled id="generate-report-btn">
+                            <i class="fas fa-file-pdf"></i> Download Commission Report PDF
+                        </button>
+                        <div class="report-info">
+                            <p><i class="fas fa-info-circle"></i> Commission reports are only available for Managers and Field Managers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Commission History Table -->
+            <div class="commission-history">
+                <h3><i class="fas fa-history"></i> Commission History</h3>
+                <div class="table-container">
+                    <table class="commissions-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Employee</th>
+                                <th>Role</th>
+                                <th>Commission Amount</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="commissions-table-body">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- Create Employee Section -->
         <section id="create-section" class="content-section">
             <div class="section-header">
@@ -217,10 +328,8 @@
                         <div class="form-group">
                             <label for="emp-role">Role *</label>
                             <select id="emp-role" name="role" required class="form-input">
-                                <option value="">Select Role</option>
                                 <option value="manager">Manager</option>
-                                <option value="field-manager">Field Manager</option>
-                                <option value="home-teacher">Home Teacher</option>
+                                <option value="branch">Branch</option>
                             </select>
                         </div>
                     </div>
@@ -250,7 +359,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="emp-phone">Phone *</label>
-                            <input type="tel" id="emp-phone" name="phn" required class="form-input">
+                            <input type="tel" id="emp-phone" name="phn" required class="form-input" pattern="[0-9]{10}" >
                         </div>
                         <div class="form-group">
                             <label for="emp-password">Password *</label>

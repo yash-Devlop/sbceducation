@@ -4,76 +4,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sbceducational - Manager Dashboard</title>
+    <title>SBC Educational - Manager Dashboard</title>
     <link rel="stylesheet" href="/client/Dashboard/css/manager-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <!-- Navigation Header -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#dashboard" class="nav-logo" data-section="dashboard">
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
                 <i class="fas fa-graduation-cap"></i>
                 <div class="logo-text">
                     <span class="logo-main">SBC Educational</span>
                     <span class="logo-sub">Manager Portal</span>
                 </div>
-            </a>
-
-            <button class="nav-toggle" onclick="toggleMobileMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
-
-            <div class="nav-menu" id="navMenu">
-                <a href="#dashboard" class="nav-link active" data-section="dashboard">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#field-managers" class="nav-link" data-section="field-managers">
-                    <i class="fas fa-users-cog"></i>
-                    <span>Managers</span>
-                </a>
-                <a href="#funds" class="nav-link" data-section="funds">
-                    <i class="fas fa-wallet"></i>
-                    <span>Funds</span>
-                </a>
-                <a href="#create" class="nav-link" data-section="create">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Add Manager</span>
-                </a>
-                <a href="#employee-search" class="nav-link" data-section="employee-search">
-                    <i class="fas fa-search"></i>
-                    <span>Search</span>
-                </a>
             </div>
+            <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
-            <div class="nav-user">
-                <div class="user-info">
+        <nav class="sidebar-nav">
+            <a href="#dashboard" class="nav-item active" data-section="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#field-managers" class="nav-item" data-section="field-managers">
+                <i class="fas fa-users-cog"></i>
+                <span>Field Managers</span>
+            </a>
+            <a href="#home-teachers" class="nav-item" data-section="home-teachers">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span>Home Teachers</span>
+            </a>
+            <a href="#salary-slips" class="nav-item" data-section="salary-slips">
+                <i class="fas fa-receipt"></i>
+                <span>Salary Slips</span>
+            </a>
+            <a href="#add-employee" class="nav-item" data-section="add-employee">
+                <i class="fas fa-user-plus"></i>
+                <span>Add Employee</span>
+            </a>
+            <a href="#transaction-history" class="nav-item" data-section="transaction-history">
+                <i class="fas fa-history"></i>
+                <span>Transactions</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <div class="user-details">
                     <span class="user-name" id="manager-name">Manager</span>
                     <span class="user-role">Administrator</span>
                 </div>
-                <div class="user-funds">
-                    <i class="fas fa-coins"></i>
-                    <span id="manager-funds">₹0</span>
-                </div>
-                <button class="logout-btn" onclick="logout()" title="Logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
             </div>
+            <div class="user-funds">
+                <i class="fas fa-wallet"></i>
+                <span id="manager-funds">₹0</span>
+            </div>
+            <button class="logout-btn" onclick="logout()" title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
         </div>
-    </nav>
+    </aside>
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <button class="menu-toggle" onclick="openMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-title">
+                <h1 id="page-title">Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <button class="refresh-btn" onclick="refreshData()" title="Refresh Data">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </header>
+
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="content-section active">
-            <div class="section-header">
-                <h1><i class="fas fa-tachometer-alt"></i> Manager Dashboard</h1>
-                <p>Manage your field managers and fund distribution</p>
-            </div>
-
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card field-managers">
                     <div class="stat-icon">
@@ -81,7 +101,7 @@
                     </div>
                     <div class="stat-info">
                         <h3 id="total-field-managers">0</h3>
-                        <p>My Field Managers</p>
+                        <p>Field Managers</p>
                     </div>
                 </div>
                 <div class="stat-card home-teachers">
@@ -90,60 +110,47 @@
                     </div>
                     <div class="stat-info">
                         <h3 id="total-home-teachers">0</h3>
-                        <p>Total Home Teachers</p>
+                        <p>Home Teachers</p>
                     </div>
                 </div>
                 <div class="stat-card funds">
                     <div class="stat-icon">
-                        <i class="fas fa-coins"></i>
+                        <i class="fas fa-wallet"></i>
                     </div>
                     <div class="stat-info">
                         <h3 id="available-funds">₹0</h3>
                         <p>Available Funds</p>
                     </div>
                 </div>
-                <div class="stat-card transfers">
+                <div class="stat-card commissions">
                     <div class="stat-icon">
-                        <i class="fas fa-exchange-alt"></i>
+                        <i class="fas fa-coins"></i>
                     </div>
                     <div class="stat-info">
-                        <h3 id="recent-transfers">0</h3>
-                        <p>Recent Transfers</p>
+                        <h3 id="total-commissions">₹0</h3>
+                        <p>Total Commissions</p>
                     </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="activity-section">
-                <h2><i class="fas fa-clock"></i> Recent Fund Transfers</h2>
-                <div class="activity-list" id="recent-transfers-list">
-                    <!-- Dynamic content -->
                 </div>
             </div>
         </section>
 
         <!-- Field Managers Section -->
         <section id="field-managers-section" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-users-cog"></i> My Field Managers</h1>
-                <div class="section-controls">
-                    <input type="text" id="field-manager-search" placeholder="Search field managers..."
-                        class="search-input">
-                </div>
+            <div class="section-controls">
+                <input type="text" id="field-manager-search" placeholder="Search field managers..." class="search-input">
             </div>
 
             <div class="table-container">
-                <table class="employees-table">
+                <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Employee ID</th>
+                            <th>ID</th>
                             <th>Name</th>
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Funds</th>
                             <th>Home Teachers</th>
                             <th>Created</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="field-managers-table-body">
@@ -153,186 +160,192 @@
             </div>
         </section>
 
-        <!-- Funds Section -->
-        <section id="funds-section" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-money-bill-wave"></i> Funds Management</h1>
-                <p>Transfer funds to your field managers</p>
+        <!-- Home Teachers Section -->
+        <section id="home-teachers-section" class="content-section">
+            <div class="section-controls">
+                <input type="text" id="home-teacher-search" placeholder="Search home teachers..." class="search-input">
             </div>
 
-            <div class="funds-grid">
-                <div class="funds-card">
-                    <h3><i class="fas fa-wallet"></i> My Funds</h3>
-                    <div class="current-funds">
-                        <div class="funds-display">
-                            <span class="funds-amount" id="current-funds-display">₹0</span>
-                        </div>
-                        <button onclick="refreshFunds()" class="btn btn-secondary btn-small">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                    </div>
-                </div>
-
-                <div class="funds-card">
-                    <h3><i class="fas fa-plus-circle"></i> Transfer Funds</h3>
-                    <div class="add-funds-form">
-                        <select id="field-manager-select" class="form-input">
-                            <option value="">Select Field Manager</option>
-                            <!-- Dynamic options -->
-                        </select>
-                        <input type="number" id="transfer-amount" placeholder="Amount to transfer" class="form-input"
-                            min="1">
-                        <button onclick="transferFunds()" class="btn btn-success" id="transfer-funds-btn">
-                            <i class="fas fa-arrow-right"></i> Transfer Funds
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Transaction History -->
-            <div class="transfer-history">
-                <div class="history-header">
-                    <h3><i class="fas fa-history"></i> Transaction History</h3>
-                    <div class="history-filters">
-                        <input type="date" id="start-date" class="form-input">
-                        <input type="date" id="end-date" class="form-input">
-                        <button onclick="filterTransactions()" class="btn btn-primary btn-small">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-                        <button onclick="clearFilters()" class="btn btn-secondary btn-small">
-                            <i class="fas fa-times"></i> Clear
-                        </button>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="transfers-table">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Type</th>
-                                <th>From/To</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transfers-table-body">
-                            <!-- Dynamic content -->
-                        </tbody>
-                    </table>
-                </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Field Manager</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="home-teachers-table-body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
             </div>
         </section>
 
-        <!-- Create Field Manager Section -->
-        <section id="create-section" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-user-plus"></i> Create New Field Manager</h1>
-                <p>Add a new field manager under your supervision</p>
+        <!-- Salary Slips Section -->
+        <section id="salary-slips-section" class="content-section">
+            <div class="salary-controls">
+                <div class="date-selectors">
+                    <select id="salary-month" class="form-input">
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                    </select>
+                    <select id="salary-year" class="form-input">
+                        <!-- Dynamic years -->
+                    </select>
+                </div>
+                <button onclick="generateSalarySlip()" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Generate Salary Slip
+                </button>
             </div>
 
-            <div class="create-form-container">
-                <form id="create-field-manager-form" class="create-form">
+            <div id="salary-slip-container" class="salary-slip-container" style="display: none;">
+                <!-- Salary slip will be generated here -->
+            </div>
+        </section>
+
+        <!-- Add Employee Section -->
+        <section id="add-employee-section" class="content-section">
+            <div class="form-container">
+                <form id="create-employee-form" class="create-form">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fm-name">Full Name *</label>
-                            <input type="text" id="fm-name" name="name" required class="form-input">
+                            <label for="emp-role">Role *</label>
+                            <select id="emp-role" name="role" required class="form-input" onchange="handleRoleChange()">
+                                <option value="">Select Role</option>
+                                <option value="field-manager">Field Manager</option>
+                                <option value="home-teacher">Home Teacher</option>
+                            </select>
                         </div>
-                        <div class="form-group">
-                            <label for="fm-email">Email *</label>
-                            <input type="email" id="fm-email" name="email" required class="form-input">
+                        <div class="form-group" id="field-manager-group" style="display: none;">
+                            <label for="manager-select">Field Manager *</label>
+                            <select id="manager-select" name="manager_id" class="form-input">
+                                <option value="">Select Field Manager</option>
+                                <!-- Dynamic options -->
+                            </select>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fm-fname">Father's Name *</label>
-                            <input type="text" id="fm-fname" name="fname" required class="form-input">
+                            <label for="emp-name">Full Name *</label>
+                            <input type="text" id="emp-name" name="name" required class="form-input">
                         </div>
                         <div class="form-group">
-                            <label for="fm-mname">Mother's Name *</label>
-                            <input type="text" id="fm-mname" name="mname" required class="form-input">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="fm-dob">Date of Birth *</label>
-                            <input type="date" id="fm-dob" name="dob" required class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label for="fm-phone">Phone *</label>
-                            <input type="tel" id="fm-phone" name="phn" required class="form-input">
+                            <label for="emp-email">Email *</label>
+                            <input type="email" id="emp-email" name="email" required class="form-input">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fm-password">Password *</label>
-                            <input type="password" id="fm-password" name="pwd" required class="form-input"
-                                minlength="6">
+                            <label for="emp-fname">Father's Name *</label>
+                            <input type="text" id="emp-fname" name="fname" required class="form-input">
                         </div>
                         <div class="form-group">
-                            <label for="fm-confirm-password">Confirm Password *</label>
-                            <input type="password" id="fm-confirm-password" required class="form-input" minlength="6">
+                            <label for="emp-mname">Mother's Name *</label>
+                            <input type="text" id="emp-mname" name="mname" required class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-dob">Date of Birth *</label>
+                            <input type="date" id="emp-dob" name="dob" required class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-phone">Phone *</label>
+                            <input type="tel" id="emp-phone" name="phn" required class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emp-password">Password *</label>
+                            <input type="password" id="emp-password" name="pwd" required class="form-input" minlength="6">
+                        </div>
+                        <div class="form-group">
+                            <label for="emp-confirm-password">Confirm Password *</label>
+                            <input type="password" id="emp-confirm-password" required class="form-input" minlength="6">
                         </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="fm-address">Address *</label>
-                        <textarea id="fm-address" name="addr" required class="form-input" rows="2"></textarea>
+                        <label for="emp-address">Address *</label>
+                        <textarea id="emp-address" name="addr" required class="form-input" rows="2"></textarea>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fm-city">City *</label>
-                            <input type="text" id="fm-city" name="city" required class="form-input">
+                            <label for="emp-city">City *</label>
+                            <input type="text" id="emp-city" name="city" required class="form-input">
                         </div>
                         <div class="form-group">
-                            <label for="fm-district">District *</label>
-                            <input type="text" id="fm-district" name="district" required class="form-input">
+                            <label for="emp-district">District *</label>
+                            <input type="text" id="emp-district" name="district" required class="form-input">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="fm-state">State *</label>
-                            <input type="text" id="fm-state" name="state" required class="form-input">
+                            <label for="emp-state">State *</label>
+                            <input type="text" id="emp-state" name="state" required class="form-input">
                         </div>
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" onclick="resetCreateForm()" class="btn btn-secondary">
+                        <button type="button" onclick="resetForm()" class="btn btn-secondary">
                             <i class="fas fa-undo"></i> Reset
                         </button>
                         <button type="submit" class="btn btn-success">
-                            <i class="fas fa-plus"></i> Create Field Manager
+                            <i class="fas fa-plus"></i> Create Employee
                         </button>
                     </div>
                 </form>
             </div>
         </section>
 
-        <!-- Employee Search Section -->
-        <section id="employee-search-section" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-search"></i> Employee Search</h1>
-                <p>Search for employee details by ID</p>
+        <!-- Transaction History Section -->
+        <section id="transaction-history-section" class="content-section">
+            <div class="history-filters">
+                <input type="date" id="start-date" class="form-input">
+                <input type="date" id="end-date" class="form-input">
+                <button onclick="filterTransactions()" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <button onclick="clearFilters()" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Clear
+                </button>
             </div>
 
-            <div class="search-container">
-                <div class="search-card">
-                    <h3><i class="fas fa-id-badge"></i> Find Employee</h3>
-                    <div class="employee-search-form">
-                        <input type="text" id="employee-id-search" placeholder="Enter Employee ID" class="form-input">
-                        <button onclick="searchEmployeeDetails()" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
-
-                    <div id="employee-search-results" class="search-results" style="display: none;">
-                        <!-- Employee details will be shown here -->
-                    </div>
-                </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>From/To</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-table-body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
             </div>
         </section>
     </main>
