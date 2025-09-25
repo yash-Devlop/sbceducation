@@ -1,28 +1,31 @@
-// home-teacher-dashboard.js
+// home-teacher-dashboard.js - Updated with Sidebar and Salary Slip
 
 const API_BASE_URL = 'http://localhost:8000';
 
 // Authentication and state management
 let currentUser = null;
-let transactionHistory = [];
 let managerInfo = null;
+
+let employmentDate = null;
 
 // Initialize dashboard when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
     checkAuthentication();
     setupEventListeners();
     initializeDashboard();
+    updateCurrentTime();
+    populateYearSelector();
+    setCurrentMonthYear();
 });
 
 // Check if user is authenticated
 function checkAuthentication() {
     const token = getCookie('access_token');
     if (!token) {
-        window.location.href = '/clientDasboard/templates/login.html';
+        window.location.href = '/client/Dashboard/templates/login.html';
         return;
     }
     
-    // Decode token to get user info (basic check)
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
         if (payload.role !== 'home-teacher') {
@@ -38,37 +41,49 @@ function checkAuthentication() {
     }
 }
 
-// Get cookie value
+// Cookie utilities
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
-// Set cookie
 function setCookie(name, value, days) {
     const expires = new Date();
     expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
     document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
 }
 
-// Delete cookie
 function deleteCookie(name) {
     document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 }
 
 // Setup event listeners
 function setupEventListeners() {
-    // Navigation
+    // Sidebar navigation
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', handleNavigation);
     });
     
     // Mobile menu toggle
-    const navToggle = document.querySelector('.nav-toggle');
-    if (navToggle) {
-        navToggle.addEventListener('click', toggleMobileMenu);
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const overlay = document.getElementById('overlay');
+    
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', toggleSidebar);
     }
+    
+    if (sidebarToggle) {
+        sidebarToggle.addEventListener('click', closeSidebar);
+    }
+    
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+    
+    // Handle window resize
+    window.addEventListener('resize', handleResize);
 }
 
 // Initialize dashboard
@@ -76,8 +91,6 @@ async function initializeDashboard() {
     showLoading(true);
     try {
         await Promise.all([
-            loadUserFunds(),
-            loadTransactionHistory(),
             loadManagerInfo(),
             updateDashboardStats()
         ]);
@@ -92,7 +105,9 @@ async function initializeDashboard() {
 // Update user display
 function updateUserDisplay() {
     if (currentUser) {
-        document.getElementById('home-teacher-name').textContent = currentUser.emp_name || 'Home Teacher';
+        const name = currentUser.emp_name || 'Home Teacher';
+        document.getElementById('home-teacher-name').textContent = name;
+        document.getElementById('welcome-name').textContent = name;
     }
 }
 
@@ -113,8 +128,21 @@ function handleNavigation(event) {
     });
     document.getElementById(`${targetSection}-section`).classList.add('active');
     
+    // Update page title
+    const titles = {
+        'dashboard': 'Dashboard',
+        'salary': 'Salary Slip',
+        'manager-info': 'My Manager'
+    };
+    document.getElementById('pageTitle').textContent = titles[targetSection] || 'Dashboard';
+    
     // Load section-specific data
     loadSectionData(targetSection);
+    
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+        closeSidebar();
+    }
 }
 
 // Load section-specific data
@@ -123,15 +151,53 @@ async function loadSectionData(section) {
         case 'dashboard':
             await updateDashboardStats();
             break;
-        case 'funds':
-            await loadTransactionHistory();
-            await loadUserFunds();
-            break;
         case 'manager-info':
             await loadManagerInfo();
             break;
+        case 'salary':
+            // Salary section is static, no data to load
+            break;
         default:
             break;
+    }
+}
+
+// Sidebar functions
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+}
+
+function handleResize() {
+    if (window.innerWidth > 768) {
+        closeSidebar();
+    }
+}
+
+// Update current time
+function updateCurrentTime() {
+    const timeElement = document.getElementById('currentTime');
+    if (timeElement) {
+        const now = new Date();
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+        timeElement.textContent = now.toLocaleDateString('en-IN', options);
     }
 }
 
@@ -171,82 +237,6 @@ async function apiCall(endpoint, options = {}) {
     return response.json();
 }
 
-// Load user funds
-async function loadUserFunds() {
-    try {
-        const response = await apiCall('/get_emp_funds');
-        const funds = response.detail?.funds || 0;
-        
-        // Update all fund displays
-        document.getElementById('home-teacher-funds').textContent = `₹${funds}`;
-        document.getElementById('current-balance-display').textContent = `₹${funds}`;
-        document.getElementById('dashboard-funds').textContent = `₹${funds}`;
-    } catch (error) {
-        console.error('Failed to load funds:', error);
-        showToast('Failed to load funds', 'error');
-    }
-}
-
-// Load transaction history
-async function loadTransactionHistory() {
-    try {
-        const startDate = document.getElementById('start-date')?.value;
-        const endDate = document.getElementById('end-date')?.value;
-        
-        const requestBody = {};
-        if (startDate) requestBody.start_date = startDate;
-        if (endDate) requestBody.end_date = endDate;
-        
-        const response = await apiCall('/funds_transfer_history', {
-            method: 'POST',
-            body: JSON.stringify(requestBody)
-        });
-        
-        transactionHistory = response.transactions || [];
-        updateTransactionHistoryTable();
-    } catch (error) {
-        console.error('Failed to load transaction history:', error);
-        showToast('Failed to load transaction history', 'error');
-    }
-}
-
-// Update transaction history table
-function updateTransactionHistoryTable() {
-    const tbody = document.getElementById('transactions-table-body');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    
-    // Filter only received transactions for home teacher
-    const receivedTransactions = transactionHistory.filter(t => t.reciever_id === currentUser.emp_id);
-    
-    if (receivedTransactions.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="4" class="text-center">
-                    <div class="empty-state">
-                        <i class="fas fa-history"></i>
-                        <h3>No Transactions Found</h3>
-                        <p>No fund transfers to display</p>
-                    </div>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-    
-    receivedTransactions.forEach(transaction => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${formatDate(transaction.transferred_at)}</td>
-            <td>${transaction.sender_name || 'Admin'}</td>
-            <td class="funds-amount">₹${transaction.transferred_amount}</td>
-            <td><span class="status-badge status-received">Completed</span></td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
 // Load manager information
 async function loadManagerInfo() {
     try {
@@ -257,6 +247,10 @@ async function loadManagerInfo() {
         
         if (response.status === 'good' && response.detail.data.manager_id) {
             const managerId = response.detail.data.manager_id;
+            
+            // Store employment date
+            employmentDate = response.detail.data.created_at || new Date().toISOString();
+            updateEmploymentDuration(employmentDate);
             
             // Get manager details
             const managerResponse = await apiCall(`/get_emp_details/${managerId}`);
@@ -293,7 +287,7 @@ function updateManagerDisplay() {
             </div>
             <div class="manager-detail-item">
                 <strong>Employee ID:</strong>
-                <span>${currentUser.emp_id ? managerInfo.manager_id || 'N/A' : 'N/A'}</span>
+                <span>${managerInfo.manager_id || currentUser.emp_id || 'N/A'}</span>
             </div>
             <div class="manager-detail-item">
                 <strong>Email:</strong>
@@ -305,7 +299,7 @@ function updateManagerDisplay() {
             </div>
             <div class="manager-detail-item">
                 <strong>Role:</strong>
-                <span>${managerInfo.role.charAt(0).toUpperCase() + managerInfo.role.slice(1).replace('-', ' ')}</span>
+                <span>Field Manager</span>
             </div>
             <div class="manager-detail-item">
                 <strong>Location:</strong>
@@ -315,204 +309,231 @@ function updateManagerDisplay() {
     }
 }
 
+// Update employment duration
+function updateEmploymentDuration(employmentDate) {
+    const empElement = document.getElementById('employment-duration');
+    const accountCreatedTime = document.getElementById('account-created-time');
+    
+    if (empElement || accountCreatedTime) {
+        const startDate = new Date(employmentDate);
+        const currentDate = new Date();
+        const diffTime = Math.abs(currentDate - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffMonths = Math.floor(diffDays / 30);
+        
+        let duration;
+        if (diffMonths < 1) {
+            duration = `${diffDays} days`;
+        } else {
+            duration = `${diffMonths} month${diffMonths > 1 ? 's' : ''}`;
+        }
+        
+        if (empElement) {
+            empElement.textContent = duration;
+        }
+        
+        if (accountCreatedTime) {
+            accountCreatedTime.textContent = formatDate(employmentDate);
+        }
+    }
+}
+
 // Update dashboard stats
 async function updateDashboardStats() {
     try {
-        // Calculate received transactions stats
-        const receivedTransactions = transactionHistory.filter(t => t.reciever_id === currentUser.emp_id);
-        
-        // Total received amount
-        const totalReceived = receivedTransactions.reduce((sum, t) => 
-            sum + parseFloat(t.transferred_amount || 0), 0);
-        
-        document.getElementById('total-received').textContent = `₹${totalReceived}`;
-        document.getElementById('transaction-count').textContent = receivedTransactions.length;
-        
-        // Update recent activity list
-        updateRecentActivityList(receivedTransactions);
-        
+        // Update time every minute
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 60000);
     } catch (error) {
         console.error('Failed to update dashboard stats:', error);
     }
 }
 
-// Update recent activity list
-function updateRecentActivityList(transactions) {
-    const activityList = document.getElementById('recent-transactions-list');
-    if (!activityList) return;
+// Salary slip functions
+function populateYearSelector() {
+    const yearSelect = document.getElementById('salary-year');
+    if (!yearSelect) return;
     
-    activityList.innerHTML = '';
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 5; // Allow 5 years back
     
-    if (transactions.length === 0) {
-        activityList.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-clock"></i>
-                <h3>No Recent Activity</h3>
-                <p>No recent fund transactions to display</p>
-            </div>
-        `;
-        return;
-    }
-    
-    // Show last 5 transactions
-    const recentTransactions = transactions
-        .sort((a, b) => new Date(b.transferred_at) - new Date(a.transferred_at))
-        .slice(0, 5);
-    
-    recentTransactions.forEach(transaction => {
-        const activityItem = document.createElement('div');
-        activityItem.className = 'activity-item';
-        activityItem.innerHTML = `
-            <div class="activity-info">
-                <div class="activity-icon">
-                    <i class="fas fa-arrow-down"></i>
-                </div>
-                <div class="activity-details">
-                    <h4>Fund Received</h4>
-                    <p>Received from ${transaction.sender_name || 'Admin'} • ${formatDate(transaction.transferred_at)}</p>
-                </div>
-            </div>
-            <div class="activity-amount">₹${transaction.transferred_amount}</div>
-        `;
-        activityList.appendChild(activityItem);
-    });
-}
-
-// Search employee details
-async function searchEmployeeDetails() {
-    const employeeId = document.getElementById('employee-id-search').value.trim();
-    const resultsContainer = document.getElementById('employee-search-results');
-    
-    if (!employeeId) {
-        showToast('Please enter an employee ID', 'warning');
-        return;
-    }
-    
-    showLoading(true);
-    try {
-        const response = await apiCall(`/get_emp_details/${employeeId}`);
-        
-        if (response.status === 'good') {
-            const employee = response.detail.data;
-            displayEmployeeSearchResults(employee);
-            resultsContainer.style.display = 'block';
-        } else {
-            resultsContainer.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-user-times"></i>
-                    <h3>Employee Not Found</h3>
-                    <p>No employee found with ID: ${employeeId}</p>
-                </div>
-            `;
-            resultsContainer.style.display = 'block';
-        }
-    } catch (error) {
-        console.error('Failed to search employee:', error);
-        showToast(error.message || 'Failed to search employee', 'error');
-        resultsContainer.style.display = 'none';
-    } finally {
-        showLoading(false);
+    yearSelect.innerHTML = '';
+    for (let year = currentYear; year >= startYear; year--) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
     }
 }
 
-// Display employee search results
-function displayEmployeeSearchResults(employee) {
-    const resultsContainer = document.getElementById('employee-search-results');
+function setCurrentMonthYear() {
+    const monthSelect = document.getElementById('salary-month');
+    const yearSelect = document.getElementById('salary-year');
+    const currentDate = new Date();
     
-    resultsContainer.innerHTML = `
-        <h4><i class="fas fa-user"></i> Employee Details</h4>
-        <div class="employee-detail-grid">
-            <div class="employee-detail-item">
-                <span><strong>Name:</strong></span>
-                <span>${employee.name}</span>
+    if (monthSelect) {
+        monthSelect.value = currentDate.getMonth() + 1;
+    }
+    
+    if (yearSelect) {
+        yearSelect.value = currentDate.getFullYear();
+    }
+}
+
+function generateCurrentSalarySlip() {
+    const currentDate = new Date();
+    const monthSelect = document.getElementById('salary-month');
+    const yearSelect = document.getElementById('salary-year');
+    
+    if (monthSelect && yearSelect) {
+        monthSelect.value = currentDate.getMonth() + 1;
+        yearSelect.value = currentDate.getFullYear();
+    }
+    
+    // Switch to salary section
+    document.querySelector('[data-section="salary"]').click();
+    
+    // Generate slip after a short delay to allow section transition
+    setTimeout(() => {
+        generateSalarySlip();
+    }, 300);
+}
+
+function generateSalarySlip() {
+    const month = parseInt(document.getElementById('salary-month').value, 10);
+    const year = parseInt(document.getElementById('salary-year').value, 10);
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
+    if (!currentUser) {
+        showToast('User information not available', 'error');
+        return;
+    }
+
+    if (!employmentDate) {
+        showToast('Employment date not available', 'error');
+        return;
+    }
+
+    // Ensure employmentDate is a Date object
+    const empDate = employmentDate instanceof Date ? employmentDate : new Date(employmentDate);
+    const requestedDate = new Date(year, month - 1, 1); // 1st day of requested month
+
+    // Compare year/month only
+    const reqYear = requestedDate.getFullYear();
+    const reqMonth = requestedDate.getMonth();
+    const empYear = empDate.getFullYear();
+    const empMonth = empDate.getMonth();
+
+    if (reqYear < empYear || (reqYear === empYear && reqMonth < empMonth)) {
+        showToast(
+            `Salary slip cannot be created before joining date (${empDate.toLocaleDateString('en-IN')})`,
+            'error'
+        );
+        return;
+    }
+
+    const slipContainer = document.getElementById('salary-slip-container');
+    const slipContent = document.getElementById('salary-slip');
+
+    const employeeName = currentUser.emp_name || 'Home Teacher';
+    const employeeId = currentUser.emp_id || 'HT001';
+    const currentDate = new Date();
+
+    const salarySlipHTML = `
+        <div class="slip-header">
+            <div class="organization-name">SBC Educational</div>
+            <div class="slip-title">Salary Slip</div>
+            <div class="slip-period">For the month of ${monthNames[month - 1]} ${year}</div>
+        </div>
+
+        <div class="employee-info">
+            <div class="info-row">
+                <span class="info-label">Employee Name:</span>
+                <span class="info-value">${employeeName}</span>
             </div>
-            <div class="employee-detail-item">
-                <span><strong>Role:</strong></span>
-                <span>${employee.role.charAt(0).toUpperCase() + employee.role.slice(1).replace('-', ' ')}</span>
+            <div class="info-row">
+                <span class="info-label">Employee ID:</span>
+                <span class="info-value">${employeeId}</span>
             </div>
-            <div class="employee-detail-item">
-                <span><strong>Email:</strong></span>
-                <span>${employee.email}</span>
+            <div class="info-row">
+                <span class="info-label">Designation:</span>
+                <span class="info-value">Home Teacher</span>
             </div>
-            <div class="employee-detail-item">
-                <span><strong>Phone:</strong></span>
-                <span>${employee.phn}</span>
+            <div class="info-row">
+                <span class="info-label">Department:</span>
+                <span class="info-value">Education</span>
             </div>
-            <div class="employee-detail-item">
-                <span><strong>Father's Name:</strong></span>
-                <span>${employee.fname}</span>
+            <div class="info-row">
+                <span class="info-label">Pay Period:</span>
+                <span class="info-value">${monthNames[month - 1]} ${year}</span>
             </div>
-            <div class="employee-detail-item">
-                <span><strong>Mother's Name:</strong></span>
-                <span>${employee.mname}</span>
-            </div>
-            <div class="employee-detail-item">
-                <span><strong>Date of Birth:</strong></span>
-                <span>${formatDate(employee.DOB)}</span>
-            </div>
-            <div class="employee-detail-item">
-                <span><strong>Address:</strong></span>
-                <span>${employee.addr}</span>
-            </div>
-            <div class="employee-detail-item">
-                <span><strong>City:</strong></span>
-                <span>${employee.city}</span>
-            </div>
-            <div class="employee-detail-item">
-                <span><strong>District:</strong></span>
-                <span>${employee.district}</span>
-            </div>
-            <div class="employee-detail-item">
-                <span><strong>State:</strong></span>
-                <span>${employee.state}</span>
-            </div>
-            <div class="employee-detail-item">
-                <span><strong>Manager ID:</strong></span>
-                <span>${employee.manager_id || 'N/A'}</span>
+            <div class="info-row">
+                <span class="info-label">Generated On:</span>
+                <span class="info-value">${currentDate.toLocaleDateString('en-IN')}</span>
             </div>
         </div>
+
+        <div class="salary-details">
+            <div class="salary-breakdown">
+                <div class="info-row">
+                    <span class="info-label">Basic Salary:</span>
+                    <span class="info-value">₹1,000</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Allowances:</span>
+                    <span class="info-value">₹50</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Deductions:</span>
+                    <span class="info-value">₹0</span>
+                </div>
+                <div class="info-row total-row">
+                    <span class="info-label">Net Salary:</span>
+                    <span class="info-value">₹1,050</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p>Employee Signature</p>
+            </div>
+            <div class="signature-box">
+                <div class="signature-line"></div>
+                <p>Authorized Signatory</p>
+            </div>
+        </div>
+
+        <div class="slip-footer">
+            <p>This is a computer generated salary slip and does not require a signature.</p>
+            <p>SBC Educational - Empowering Communities Through Education</p>
+            <p>Generated on ${currentDate.toLocaleDateString('en-IN')} at ${currentDate.toLocaleTimeString('en-IN')}</p>
+        </div>
     `;
+
+    slipContent.innerHTML = salarySlipHTML;
+    slipContainer.style.display = 'block';
+
+    showToast('Salary slip generated successfully', 'success');
 }
 
-// Filter transactions
-async function filterTransactions() {
-    await loadTransactionHistory();
+
+function printSalarySlip() {
+    window.print();
 }
 
-// Clear transaction filters
-function clearFilters() {
-    const startDate = document.getElementById('start-date');
-    const endDate = document.getElementById('end-date');
-    
-    if (startDate) startDate.value = '';
-    if (endDate) endDate.value = '';
-    
-    loadTransactionHistory();
+function downloadSalarySlip() {
+    // For download functionality, you might want to use a library like jsPDF
+    showToast('Download feature will be available soon', 'info');
 }
 
-// Refresh functions
-async function refreshFunds() {
-    showLoading(true);
-    await loadUserFunds();
-    showLoading(false);
-    showToast('Funds refreshed', 'success');
-}
-
-// Mobile menu toggle
-function toggleMobileMenu() {
-    const navMenu = document.getElementById('navMenu');
-    navMenu.classList.toggle('active');
-}
-
-// Logout function
-function logout() {
-    deleteCookie('access_token');
-    deleteCookie('user_name');
-    deleteCookie('user_role');
-    showToast('Logged out successfully', 'success');
-    setTimeout(() => {
-        window.location.href = '/client/Dashboard/templates/login.html';
-    }, 1000);
+// Quick action functions
+function viewManager() {
+    document.querySelector('[data-section="manager-info"]').click();
 }
 
 // Utility functions
@@ -577,6 +598,17 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+// Logout function
+function logout() {
+    deleteCookie('access_token');
+    deleteCookie('user_name');
+    deleteCookie('user_role');
+    showToast('Logged out successfully', 'success');
+    setTimeout(() => {
+        window.location.href = '/client/Dashboard/templates/login.html';
+    }, 1000);
+}
+
 // Handle API errors globally
 window.addEventListener('unhandledrejection', function(event) {
     console.error('Unhandled promise rejection:', event.reason);
@@ -596,14 +628,11 @@ window.addEventListener('offline', function() {
     showToast('Connection lost', 'warning');
 });
 
-// Auto-refresh data every 10 minutes (less frequent for home teachers)
+// Auto-refresh manager data every 30 minutes
 setInterval(async function() {
     try {
-        await Promise.all([
-            loadUserFunds(),
-            loadTransactionHistory()
-        ]);
+        await loadManagerInfo();
     } catch (error) {
         console.error('Auto-refresh failed:', error);
     }
-}, 10 * 60 * 1000);
+}, 30 * 60 * 1000);

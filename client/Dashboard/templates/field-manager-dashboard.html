@@ -6,10 +6,10 @@
     <link rel="stylesheet" href="/client/Dashboard/css/field-manager-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <title>Document</title>
+    <title>Field Manager Dashboard</title>
 </head>
 <body>
-        <!-- Mobile Header -->
+    <!-- Mobile Header -->
     <div class="mobile-header" style="display: none;">
         <button class="mobile-toggle" onclick="toggleMobileSidebar()">
             <i class="fas fa-bars"></i>
@@ -53,21 +53,21 @@
                 </a>
             </div>
             <div class="nav-item">
+                <a href="#manager-info" class="nav-link" data-section="manager-info">
+                    <i class="fas fa-user-tie nav-icon"></i>
+                    <span class="nav-text">My Manager</span>
+                </a>
+            </div>
+            <div class="nav-item">
                 <a href="#home-teachers" class="nav-link" data-section="home-teachers">
                     <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                    <span class="nav-text">Home Teachers</span>
+                    <span class="nav-text">My Home Teachers</span>
                 </a>
             </div>
             <div class="nav-item">
                 <a href="#commissions" class="nav-link" data-section="commissions">
                     <i class="fas fa-coins nav-icon"></i>
                     <span class="nav-text">My Commissions</span>
-                </a>
-            </div>
-            <div class="nav-item">
-                <a href="#transactions" class="nav-link" data-section="transactions">
-                    <i class="fas fa-history nav-icon"></i>
-                    <span class="nav-text">Transaction History</span>
                 </a>
             </div>
         </nav>
@@ -134,30 +134,41 @@
             <div id="salary-slip-container" class="salary-slip-container" style="display: none;"></div>
         </section>
 
-        <!-- Transaction History Section -->
-        <section id="transactions-section" class="content-section">
+        <!-- Manager Information Section -->
+        <section id="manager-info-section" class="content-section">
             <div class="section-header">
-                <h1><i class="fas fa-history"></i> Transaction History</h1>
-                <p>View your fund transfer history</p>
-                
-                <div class="form-row" style="margin-top: 1rem;">
-                    <div class="form-group">
-                        <label for="start-date">Start Date:</label>
-                        <input type="date" id="start-date" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label for="end-date">End Date:</label>
-                        <input type="date" id="end-date" class="form-input">
-                    </div>
-                    <div class="form-group">
-                        <label style="visibility: hidden;">Action:</label>
-                        <button onclick="filterTransactions()" class="btn btn-primary btn-small">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-                        <button onclick="clearFilters()" class="btn btn-secondary btn-small">
-                            <i class="fas fa-times"></i> Clear
-                        </button>
-                    </div>
+                <h1><i class="fas fa-user-tie"></i> My Manager Information</h1>
+                <p>Information about your reporting manager</p>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <tbody id="manager-info-table">
+                        <tr>
+                            <td><strong>Manager Name:</strong></td>
+                            <td id="manager-name">Loading...</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Manager ID:</strong></td>
+                            <td id="manager-id">Loading...</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Manager Email:</strong></td>
+                            <td id="manager-email">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Home Teachers Section -->
+        <section id="home-teachers-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-chalkboard-teacher"></i> My Home Teachers</h1>
+                <p>Home teachers under your supervision</p>
+                <div style="margin-top: 1rem;">
+                    <input type="text" id="home-teacher-search" placeholder="Search home teachers..."
+                        class="search-input" style="max-width: 400px;">
                 </div>
             </div>
 
@@ -165,14 +176,82 @@
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Type</th>
-                            <th>From/To</th>
-                            <th>Amount</th>
-                            <th>Status</th>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>City</th>
+                            <th>State</th>
+                            <th>Created Date</th>
                         </tr>
                     </thead>
-                    <tbody id="transactions-table-body">
+                    <tbody id="home-teachers-table-body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Commissions Section -->
+        <section id="commissions-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-coins"></i> My Commissions</h1>
+                <p>View and generate commission slips based on your earnings</p>
+                
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="salary-month">Select Month:</label>
+                        <select id="salary-month" class="form-input">
+                            <option value="">Select Month</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="salary-year">Select Year:</label>
+                        <select id="salary-year" class="form-input">
+                            <option value="">Select Year</option>
+                            <option value="2024">2024</option>
+                            <option value="2025">2025</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label style="visibility: hidden;">Action:</label>
+                        <button onclick="generateSalarySlip()" class="btn btn-success">
+                            <i class="fas fa-receipt"></i> Generate Commission Slip
+                        </button>
+                        <button onclick="printCurrentMonthSlip()" class="btn btn-primary" style="margin-left: 10px;">
+                            <i class="fas fa-print"></i> Print Slip
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <h3 style="padding: 1rem; background: var(--field-manager-primary); color: white; margin: 0;">
+                    <i class="fas fa-coins"></i> All Commission Records
+                </h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Registration Type</th>
+                            <th>Employee ID</th>
+                            <th>Employee Name</th>
+                            <th>Commission Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-commissions-table-body">
                         <!-- Dynamic content -->
                     </tbody>
                 </table>

@@ -10,204 +10,237 @@
 </head>
 
 <body>
-    <!-- Navigation Header -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="#dashboard" class="nav-logo" data-section="dashboard">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
                 <i class="fas fa-graduation-cap"></i>
                 <div class="logo-text">
                     <span class="logo-main">SBC Educational</span>
-                    <span class="logo-sub">Home Teacher Portal</span>
+                    <span class="logo-sub">Home Teacher</span>
                 </div>
-            </a>
-
-            <button class="nav-toggle" onclick="toggleMobileMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
-
-            <div class="nav-menu" id="navMenu">
-                <a href="#dashboard" class="nav-link active" data-section="dashboard">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="#funds" class="nav-link" data-section="funds">
-                    <i class="fas fa-wallet"></i>
-                    <span>My Funds</span>
-                </a>
-                <a href="#manager-info" class="nav-link" data-section="manager-info">
-                    <i class="fas fa-user-tie"></i>
-                    <span>My Manager</span>
-                </a>
-                <a href="#employee-search" class="nav-link" data-section="employee-search">
-                    <i class="fas fa-search"></i>
-                    <span>Search</span>
-                </a>
             </div>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
-            <div class="nav-user">
-                <div class="user-info">
-                    <span class="user-name" id="home-teacher-name">Home Teacher</span>
-                    <span class="user-role">Home Teacher</span>
+        <div class="user-profile">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-info">
+                <h3 id="home-teacher-name">Home Teacher</h3>
+                <span class="user-role">Home Teacher</span>
+                <div class="salary-info">
+                    <i class="fas fa-rupee-sign"></i>
+                    <span>Monthly Salary: ₹1,050</span>
                 </div>
-                <div class="user-funds">
-                    <i class="fas fa-coins"></i>
-                    <span id="home-teacher-funds">₹0</span>
-                </div>
-                <button class="logout-btn" onclick="logout()" title="Logout">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
             </div>
         </div>
-    </nav>
+
+        <nav class="sidebar-nav">
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#salary" class="nav-link" data-section="salary">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Salary Slip</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#manager-info" class="nav-link" data-section="manager-info">
+                        <i class="fas fa-user-tie"></i>
+                        <span>My Manager</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay"></div>
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="header-title">
+                <h1 id="pageTitle">Dashboard</h1>
+            </div>
+            <div class="header-actions">
+                <div class="current-time" id="currentTime"></div>
+            </div>
+        </header>
+
         <!-- Dashboard Section -->
         <section id="dashboard-section" class="content-section active">
-            <div class="section-header">
-                <h1><i class="fas fa-tachometer-alt"></i> Home Teacher Dashboard</h1>
-                <p>Welcome to your personal dashboard</p>
-            </div>
+            <div class="section-content">
+                <div class="welcome-card">
+                    <div class="welcome-content">
+                        <h2>Welcome back, <span id="welcome-name">Home Teacher</span>!</h2>
+                        <p>Here's your overview for today</p>
+                    </div>
+                    <div class="welcome-icon">
+                        <i class="fas fa-hand-wave"></i>
+                    </div>
+                </div>
 
-            <!-- Stats Cards -->
-            <div class="stats-grid">
-                <div class="stat-card funds">
-                    <div class="stat-icon">
-                        <i class="fas fa-wallet"></i>
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card salary">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>₹1,050</h3>
+                            <p>Monthly Salary</p>
+                        </div>
                     </div>
-                    <div class="stat-info">
-                        <h3 id="dashboard-funds">₹0</h3>
-                        <p>Available Funds</p>
+                    <div class="stat-card manager-info-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="manager-name-short">-</h3>
+                            <p>Field Manager</p>
+                        </div>
                     </div>
-                </div>
-                <div class="stat-card received-funds">
-                    <div class="stat-icon">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="total-received">₹0</h3>
-                        <p>Total Received</p>
-                    </div>
-                </div>
-                <div class="stat-card transactions">
-                    <div class="stat-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="transaction-count">0</h3>
-                        <p>Total Transactions</p>
-                    </div>
-                </div>
-                <div class="stat-card manager-info-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="stat-info">
-                        <h3 id="manager-name-short">-</h3>
-                        <p>Field Manager</p>
+                    <div class="stat-card employment">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3 id="employment-duration">-</h3>
+                            <p>Employment Duration</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Recent Activity -->
-            <div class="activity-section">
-                <h2><i class="fas fa-clock"></i> Recent Fund Transactions</h2>
-                <div class="activity-list" id="recent-transactions-list">
-                    <!-- Dynamic content -->
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="actions-grid">
+                        <button class="action-btn" onclick="generateCurrentSalarySlip()">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Generate Current Salary Slip</span>
+                        </button>
+                        <button class="action-btn" onclick="viewManager()">
+                            <i class="fas fa-user-tie"></i>
+                            <span>View My Manager</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-section">
+                    <h3><i class="fas fa-clock"></i> Recent Activity</h3>
+                    <div class="activity-list" id="recent-activity-list">
+                        <div class="activity-item">
+                            <div class="activity-info">
+                                <div class="activity-icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div class="activity-details">
+                                    <h4>Account Created</h4>
+                                    <p>Your home teacher account was created</p>
+                                </div>
+                            </div>
+                            <div class="activity-time" id="account-created-time">-</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Funds Section -->
-        <section id="funds-section" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-wallet"></i> My Funds</h1>
-                <p>View your current funds and transaction history</p>
-            </div>
+        <!-- Salary Slip Section -->
+        <section id="salary-section" class="content-section">
+            <div class="section-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-money-bill-wave"></i> Salary Slip</h2>
+                    <p>Generate and print your salary slips</p>
+                </div>
 
-            <div class="funds-overview">
-                <div class="funds-card current-balance">
-                    <h3><i class="fas fa-coins"></i> Current Balance</h3>
-                    <div class="balance-display">
-                        <span class="balance-amount" id="current-balance-display">₹0</span>
-                        <button onclick="refreshFunds()" class="btn btn-secondary btn-small">
-                            <i class="fas fa-sync-alt"></i> Refresh
+                <div class="salary-controls">
+                    <div class="date-selector">
+                        <label for="salary-month">Month:</label>
+                        <select id="salary-month" class="form-input">
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                    </div>
+                    <div class="date-selector">
+                        <label for="salary-year">Year:</label>
+                        <select id="salary-year" class="form-input">
+                            <!-- Years will be populated by JavaScript -->
+                        </select>
+                    </div>
+                    <button onclick="generateSalarySlip()" class="btn btn-primary">
+                        <i class="fas fa-file-alt"></i> Generate Slip
+                    </button>
+                </div>
+
+                <!-- Salary Slip Preview -->
+                <div id="salary-slip-container" class="salary-slip-container" style="display: none;">
+                    <div class="print-actions">
+                        <button onclick="printSalarySlip()" class="btn btn-success">
+                            <i class="fas fa-print"></i> Print Slip
+                        </button>
+                        <button onclick="downloadSalarySlip()" class="btn btn-secondary">
+                            <i class="fas fa-download"></i> Download PDF
                         </button>
                     </div>
-                </div>
-            </div>
-
-            <!-- Transaction History -->
-            <div class="transaction-history">
-                <div class="history-header">
-                    <h3><i class="fas fa-history"></i> Transaction History</h3>
-                    <div class="history-filters">
-                        <input type="date" id="start-date" class="form-input">
-                        <input type="date" id="end-date" class="form-input">
-                        <button onclick="filterTransactions()" class="btn btn-primary btn-small">
-                            <i class="fas fa-filter"></i> Filter
-                        </button>
-                        <button onclick="clearFilters()" class="btn btn-secondary btn-small">
-                            <i class="fas fa-times"></i> Clear
-                        </button>
+                    <div id="salary-slip" class="salary-slip">
+                        <!-- Salary slip content will be generated here -->
                     </div>
-                </div>
-                <div class="table-container">
-                    <table class="transactions-table">
-                        <thead>
-                            <tr>
-                                <th>Date & Time</th>
-                                <th>From</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactions-table-body">
-                            <!-- Dynamic content -->
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </section>
 
         <!-- Manager Info Section -->
         <section id="manager-info-section" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-user-tie"></i> My Manager</h1>
-                <p>Information about your supervising field manager</p>
-            </div>
-
-            <div class="manager-info-container">
-                <div class="manager-card">
-                    <div class="manager-avatar">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="manager-details" id="manager-details">
-                        <!-- Dynamic content -->
-                    </div>
+            <div class="section-content">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-tie"></i> My Field Manager</h2>
+                    <p>Information about your supervising field manager</p>
                 </div>
-            </div>
-        </section>
 
-        <!-- Employee Search Section -->
-        <section id="employee-search-section" class="content-section">
-            <div class="section-header">
-                <h1><i class="fas fa-search"></i> Employee Search</h1>
-                <p>Search for employee details by ID</p>
-            </div>
-
-            <div class="search-container">
-                <div class="search-card">
-                    <h3><i class="fas fa-id-badge"></i> Find Employee</h3>
-                    <div class="employee-search-form">
-                        <input type="text" id="employee-id-search" placeholder="Enter Employee ID" class="form-input">
-                        <button onclick="searchEmployeeDetails()" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Search
-                        </button>
-                    </div>
-
-                    <div id="employee-search-results" class="search-results" style="display: none;">
-                        <!-- Employee details will be shown here -->
+                <div class="manager-info-container">
+                    <div class="manager-card">
+                        <div class="manager-avatar">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="manager-details" id="manager-details">
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading manager information...</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

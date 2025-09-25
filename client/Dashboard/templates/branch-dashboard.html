@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/client/Dashboard/css/branch-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Branch Dashboard</title>
+</head>
+<body>
+    <!-- Mobile Header -->
+    <div class="mobile-header" style="display: none;">
+        <button class="mobile-toggle" onclick="toggleMobileSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h3>SBC Educational</h3>
+        <button class="logout-btn btn-small" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" onclick="closeMobileSidebar()"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-graduation-cap sidebar-logo"></i>
+            <div>
+                <div class="sidebar-title">SBC Educational</div>
+                <div class="sidebar-subtitle">Branch Office</div>
+            </div>
+        </div>
+
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-angle-left" id="toggleIcon"></i>
+        </button>
+
+        <div class="sidebar-user">
+            <div class="user-avatar">
+                <i class="fas fa-building"></i>
+            </div>
+            <div class="user-name" id="branch-name">Branch Manager</div>
+            <div class="user-role">Branch Office</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="nav-item">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt nav-icon"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#employees" class="nav-link" data-section="employees">
+                    <i class="fas fa-users nav-icon"></i>
+                    <span class="nav-text">All Employees</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#hierarchy" class="nav-link" data-section="hierarchy">
+                    <i class="fas fa-sitemap nav-icon"></i>
+                    <span class="nav-text">Employee Hierarchy</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#commissions" class="nav-link" data-section="commissions">
+                    <i class="fas fa-coins nav-icon"></i>
+                    <span class="nav-text">All Commissions</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#transactions" class="nav-link" data-section="transactions">
+                    <i class="fas fa-exchange-alt nav-icon"></i>
+                    <span class="nav-text">Fund Transactions</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="#analytics" class="nav-link" data-section="analytics">
+                    <i class="fas fa-chart-bar nav-icon"></i>
+                    <span class="nav-text">Analytics</span>
+                </a>
+            </div>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span class="logout-text">Logout</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="content-section active">
+            <div class="section-header">
+                <h1><i class="fas fa-tachometer-alt"></i> Branch Dashboard</h1>
+                <p>Complete overview of organizational activities</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-managers">0</h3>
+                        <p>Total Managers</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-field-managers">0</h3>
+                        <p>Field Managers</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-home-teachers">0</h3>
+                        <p>Home Teachers</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="total-funds">₹0</h3>
+                        <p>Total Funds Distributed</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="table-container">
+                    <h3 class="table-header">
+                        <i class="fas fa-clock"></i> Recent Activities
+                    </h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Activity Type</th>
+                                <th>Employee</th>
+                                <th>Details</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-activities-table">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-container">
+                    <h3 class="table-header">
+                        <i class="fas fa-coins"></i> Recent Commissions
+                    </h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Manager</th>
+                                <th>Type</th>
+                                <th>Commission</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-commissions-table">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Employees Section -->
+        <section id="employees-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-users"></i> All Employees</h1>
+                <p>Complete list of all organization employees</p>
+                <div style="margin-top: 1rem;">
+                    <input type="text" id="employee-search" placeholder="Search employees..."
+                        class="search-input" style="max-width: 400px;">
+                </div>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-role="all">All</button>
+                <button class="filter-tab" data-role="manager">Managers</button>
+                <button class="filter-tab" data-role="field-manager">Field Managers</button>
+                <button class="filter-tab" data-role="home-teacher">Home Teachers</button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Manager</th>
+                            <th>Funds</th>
+                            <th>Joined Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employees-table-body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Hierarchy Section -->
+        <section id="hierarchy-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-sitemap"></i> Employee Hierarchy</h1>
+                <p>Organization structure and reporting relationships</p>
+            </div>
+
+            <div id="hierarchy-container">
+                <!-- Dynamic hierarchy content -->
+            </div>
+        </section>
+
+        <!-- Commissions Section -->
+        <section id="commissions-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-coins"></i> All Commissions</h1>
+                <p>Complete commission records for all managers and field managers</p>
+                
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="commission-start-date">Start Date:</label>
+                        <input type="date" id="commission-start-date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="commission-end-date">End Date:</label>
+                        <input type="date" id="commission-end-date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label style="visibility: hidden;">Action:</label>
+                        <button onclick="loadCommissionHistory()" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filter Commissions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="commission-summary">
+                <div class="summary-card">
+                    <h4>Total Manager Commissions</h4>
+                    <span id="total-manager-commission">₹0</span>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Field Manager Commissions</h4>
+                    <span id="total-field-manager-commission">₹0</span>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Registrations</h4>
+                    <span id="total-registrations">0</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Manager</th>
+                            <th>Field Manager</th>
+                            <th>Registration Type</th>
+                            <th>New Employee</th>
+                            <th>Manager Commission</th>
+                            <th>Field Manager Commission</th>
+                        </tr>
+                    </thead>
+                    <tbody id="all-commissions-table-body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Transactions Section -->
+        <section id="transactions-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-exchange-alt"></i> Fund Transactions</h1>
+                <p>Complete fund transfer history and financial overview</p>
+                
+                <div class="form-row" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label for="transaction-start-date">Start Date:</label>
+                        <input type="date" id="transaction-start-date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="transaction-end-date">End Date:</label>
+                        <input type="date" id="transaction-end-date" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label style="visibility: hidden;">Action:</label>
+                        <button onclick="loadTransactionHistory()" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Filter Transactions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="transaction-summary">
+                <div class="summary-card">
+                    <h4>Total Transfers</h4>
+                    <span id="total-transfers">0</span>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Amount Transferred</h4>
+                    <span id="total-amount-transferred">₹0</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sender</th>
+                            <th>Receiver</th>
+                            <th>Amount</th>
+                            <th>Receiver Role</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-table-body">
+                        <!-- Dynamic content -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Analytics Section -->
+        <section id="analytics-section" class="content-section">
+            <div class="section-header">
+                <h1><i class="fas fa-chart-bar"></i> Analytics & Insights</h1>
+                <p>Data-driven insights and performance metrics</p>
+            </div>
+
+            <div class="analytics-grid">
+                <div class="chart-container">
+                    <h4>Employee Growth Trend</h4>
+                    <div id="employee-growth-chart" class="chart-placeholder">
+                        <i class="fas fa-chart-line"></i>
+                        <p>Employee growth visualization</p>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h4>Commission Distribution</h4>
+                    <div id="commission-distribution-chart" class="chart-placeholder">
+                        <i class="fas fa-chart-pie"></i>
+                        <p>Commission distribution by role</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="performance-metrics">
+                <div class="metric-card">
+                    <h4>Top Performing Manager</h4>
+                    <div id="top-manager">Loading...</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Most Active Field Manager</h4>
+                    <div id="top-field-manager">Loading...</div>
+                </div>
+                <div class="metric-card">
+                    <h4>Average Monthly Growth</h4>
+                    <div id="avg-growth">Loading...</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <script src="/client/Dashboard/js/branch-dashboard.js"></script>
+</body>
+</html>

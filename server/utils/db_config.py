@@ -85,6 +85,21 @@ def initialize_empty_tables():
                 registered_at DATETIME
             );
         """)
+    
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS salary_slip_history (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                employee_id VARCHAR(20) NOT NULL,
+                month INT NOT NULL CHECK (month BETWEEN 1 AND 12),
+                year INT NOT NULL CHECK (year BETWEEN 2020 AND 2030),
+                generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE KEY unique_employee_month_year (employee_id, month, year),
+                FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE,
+                INDEX idx_employee_date (employee_id, year DESC, month DESC),
+                INDEX idx_generated_at (generated_at DESC)
+            )
+        """)
 
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_querry (
