@@ -10,20 +10,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout the repo
+      # 1️⃣ Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2. Setup SSH key with passphrase
+      # 2️⃣ Setup SSH key with passphrase using expect
       - name: Setup SSH key
         run: |
+          sudo apt-get update && sudo apt-get install -y expect
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           eval "$(ssh-agent -s)"
-          ssh-add ~/.ssh/id_ed25519 <<< "${{ secrets.VPS_SSH_PASSPHRASE }}"
+          /usr/bin/expect <<EOF
+          spawn ssh-add ~/.ssh/id_ed25519
+          expect "Enter passphrase"
+          send "${{ secrets.VPS_SSH_PASSPHRASE }}\r"
+          expect eof
+          EOF
 
-      # 3. SSH into VPS and deploy
+      # 3️⃣ SSH into VPS and deploy
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
@@ -38,6 +44,5 @@ jobs:
           sudo systemctl restart sbc-backend
 
           # --- Frontend ---
-          # Plain HTML/CSS/JS - no build needed
           echo "Frontend updated"
           EOF
