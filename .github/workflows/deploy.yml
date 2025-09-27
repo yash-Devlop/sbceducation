@@ -10,45 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout the repo
+      # 1. Checkout the repo
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Setup SSH key with passphrase using expect
+      # 2. Setup SSH key
       - name: Setup SSH key
         run: |
-          sudo apt-get update && sudo apt-get install -y expect
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           eval "$(ssh-agent -s)"
-          /usr/bin/expect <<EOF
-          spawn ssh-add ~/.ssh/id_ed25519
-          expect "Enter passphrase"
-          send "${{ secrets.VPS_SSH_PASSPHRASE }}\r"
-          expect eof
-          EOF
+          ssh-add ~/.ssh/id_ed25519
 
-      # 3️⃣ SSH into VPS and deploy
+      # 3. SSH into VPS and deploy
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-          # --- Pull backend code ---
-          cd /var/www/sbc/sbceducation/server
-          git reset --hard
-          git pull origin deploy
-
-          # --- Install dependencies ---
-          source venv/bin/activate
-          pip install -r requirements.txt
-
-          # --- Restart service ---
-          sudo systemctl restart sbc-backend
-
-          # --- Optional: pull frontend if needed ---
           cd /var/www/sbc/sbceducation
           git reset --hard
           git pull origin deploy
 
-          echo "Deployment complete"
+          # --- Backend ---
+          cd server
+          source venv/bin/activate
+          pip install -r requirements.txt
+          sudo systemctl restart sbc-backend
+
+          # --- Frontend ---
+          # Plain HTML/CSS/JS - no build needed
+          echo "Frontend updated"
           EOF
