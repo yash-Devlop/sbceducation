@@ -1,0 +1,43 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Setup SSH key with passphrase
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/id_ed25519 <<< "${{ secrets.VPS_SSH_PASSPHRASE }}"
+
+      # 3. SSH into VPS and deploy
+      - name: Deploy to VPS
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          cd /var/www/sbc/sbceducation
+          git reset --hard
+          git pull origin deploy
+
+          # --- Backend ---
+          cd server
+          source venv/bin/activate
+          pip install -r requirements.txt
+          sudo systemctl restart sbc-backend
+
+          # --- Frontend ---
+          # Plain HTML/CSS/JS - no build needed
+          echo "Frontend updated"
+          EOF
