@@ -1549,7 +1549,7 @@ async def get_field_manager_home_teachers(field_manager_id: str, token_data: dic
         conn.close()
 
 
-@app.get("/get_manager_field_managers/{manager_id}")
+@app.get("/get_manager_field_managerss/{manager_id}")
 async def get_manager_field_managers(manager_id: str, token_data: dict = Depends(get_login_role)):
     """
     Get all field managers under a specific manager with their home teacher counts
