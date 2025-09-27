@@ -115,7 +115,7 @@ function redirectToDashboard(role) {
         'home-teacher': '/client/Dashboard/templates/home-teacher-dashboard.html',
         'branch': '/client/Dashboard/templates/branch-dashboard.html'
     };
-    
+
     window.location.href = dashboardUrls[role] || '/dashboard';
 }
 
