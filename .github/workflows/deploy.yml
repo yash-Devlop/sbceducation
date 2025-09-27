@@ -33,16 +33,22 @@ jobs:
       - name: Deploy to VPS
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+          # --- Pull backend code ---
+          cd /var/www/sbc/sbceducation/server
+          git reset --hard
+          git pull origin deploy
+
+          # --- Install dependencies ---
+          source venv/bin/activate
+          pip install -r requirements.txt
+
+          # --- Restart service ---
+          sudo systemctl restart sbc-backend
+
+          # --- Optional: pull frontend if needed ---
           cd /var/www/sbc/sbceducation
           git reset --hard
           git pull origin deploy
 
-          # --- Backend ---
-          cd server
-          source venv/bin/activate
-          pip install -r requirements.txt
-          sudo systemctl restart sbc-backend
-
-          # --- Frontend ---
-          echo "Frontend updated"
+          echo "Deployment complete"
           EOF
